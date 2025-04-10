@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/imagesloaded/4.1.4/imagesloaded.pkgd.min.js"></script>
+    <link rel="stylesheet" href="/css/homepage.css">
+
+    <title><%= title %></title>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <a href="/" class="logo">
+                    <img src="<%= logoPath %>" alt="<%= companyName %>" class="logo-img">
+                </a>
+                <button class="nav-toggle">☰</button>
+                <nav class="main-nav">
+                    <button class="close-nav">✕</button>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">Categories</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" data-category="all">All</a></li>
+                                <% categories.forEach(category => { %>
+                                <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
+                                <% }); %>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Video Intro Section -->
+    <section class="intro-section">
+        <div class="intro-container">
+            <div class="intro-video-wrapper">
+                <video class="intro-background-video" autoplay loop muted playsinline>
+                    <source src="<%= introVideo %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="intro-overlay">
+                    <h1 class="intro-heading"><%= introHeading %></h1>
+                    <p class="intro-description"><%= introDescription %></p>
+                    <a href="/contact" class="contact-button">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Grid Section -->
+    <section class="video-grid-section">
+        <div class="container">
+            <div class="video-grid">
+                <% allMedia.forEach(item => { %>
+                    <div class="grid-item" data-category="<%= item.category_id %>">
+                        <div class="grid-item-inner" <% if(item.type === 'video') { %>data-video-src="<%= item.file_path %>"<% } %>>
+                            <% if(item.type === 'image') { %>
+                                <img src="<%= item.file_path %>" alt="<%= item.title %>">
+                            <% } else { %>
+                                <video preload="metadata" poster="<%= item.file_path.replace('.mp4', '-poster.jpg') %>" muted loop playsinline>
+                                    <source src="<%= item.file_path %>" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div class="play-button"></div>
+                            <% } %>
+                            <div class="grid-item-overlay">
+                                <h3 class="grid-item-title"><%= item.title %></h3>
+                                <p class="grid-item-category"><%= item.category_name %></p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Modal -->
+    <div class="video-modal">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+            <video class="modal-video" controls>
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="about-modal">
+        <div class="modal-content about-content">
+            <button class="close-modal">&times;</button>
+            <h2>About <%= companyName %></h2>
+            <div class="about-text">
+                <% aboutText.forEach(paragraph => { %>
+                    <p><%= paragraph %></p>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <!-- Column 1: About -->
+            <div class="footer-column">
+                <h3>About Us</h3>
+                <p><%= footerAbout %></p>
+                <div class="social-links">
+                    <% socialLinks.forEach(social => { %>
+                        <a href="<%= social.url %>" class="social-link"><img src="<%= social.icon %>" alt="<%= social.name %>"></a>
+                    <% }); %>
+                </div>
+            </div>
+    
+            <!-- Column 2: Quick Links -->
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <% quickLinks.forEach(link => { %>
+                        <li><a href="<%= link.url %>"><%= link.name %></a></li>
+                    <% }); %>
+                </ul>
+            </div>
+    
+            <!-- Column 3: Services -->
+            <div class="footer-column">
+                <h3>Our Services</h3>
+                <ul class="footer-links">
+                    <% services.forEach(service => { %>
+                        <li><a href="<%= service.url %>"><%= service.name %></a></li>
+                    <% }); %>
+                </ul>
+            </div>
+     
+            <!-- Column 4: Contact Info -->
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <% contactInfo.forEach(info => { %>
+                    <div class="contact-info">
+                        <span class="contact-info-icon"><%= info.icon %></span>
+                        <span class="contact-info-text"><%= info.text %></span>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    
+        <div class="container">
+            <div class="footer-bottom">
+                <p class="copyright">© <%= currentYear %> <%= companyName %>. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/js/homepage.js"></script>
+</body>
+</html>

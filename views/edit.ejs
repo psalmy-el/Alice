@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Media</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    #preview {
+      max-width: 100%;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border: 2px solid #ccc;
+      overflow: hidden;
+    }
+    #preview img, #preview video {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">Media Admin</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/upload">Upload New</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header bg-warning">
+            <h4 class="mb-0">Edit Media</h4>
+          </div>
+          <div class="card-body">
+            <div id="preview">
+              <% if (media.type === 'image') { %>
+                <img src="<%= media.file_path %>" alt="<%= media.title %>">
+              <% } else { %>
+                <video controls>
+                  <source src="<%= media.file_path %>" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              <% } %>
+            </div>
+            
+            <form action="/edit/<%= media.id %>?_method=PUT" method="POST">
+              <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" name="title" value="<%= media.title %>" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3"><%= media.description %></textarea>
+              </div>
+              
+              <div class="mb-3">
+                <label for="category_id" class="form-label">Category</label>
+                <select class="form-select" id="category_id" name="category_id">
+                  <option value="">-- Select Category --</option>
+                  <% categories.forEach(category => { %>
+                    <option value="<%= category.id %>" <%= media.category_id == category.id ? 'selected' : '' %>>
+                      <%= category.name %>
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <p class="text-muted">
+                  <i class="fas fa-info-circle"></i> To change the media file, please delete this entry and upload a new one.
+                </p>
+              </div>
+              
+              <div class="text-end">
+                <a href="/" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-warning">Update</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

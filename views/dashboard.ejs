@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .media-card {
+      height: 250px;
+      overflow: hidden;
+      position: relative;
+    }
+    .media-card img, .media-card video {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+    .media-actions {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+    .media-preview {
+      background-color: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">Media Admin</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/upload">Upload New</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Media Dashboard</h1>
+      <a href="/upload" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Upload New
+      </a>
+    </div>
+
+    <% if (media && media.length > 0) { %>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        <% media.forEach(item => { %>
+          <div class="col">
+            <div class="card h-100 media-card">
+              <div class="media-actions">
+                <a href="/edit/<%= item.id %>" class="btn btn-sm btn-warning">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <form action="/delete/<%= item.id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+              <div class="media-preview">
+                <% if (item.type === 'image') { %>
+                  <img src="<%= item.file_path %>" class="card-img-top" alt="<%= item.title %>">
+                <% } else { %>
+                  <video class="card-img-top" controls>
+                    <source src="<%= item.file_path %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                <% } %>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title"><%= item.title %></h5>
+                <p class="card-text text-truncate"><%= item.description %></p>
+                <p class="card-text"><small class="text-muted">
+                  Type: <%= item.type.charAt(0).toUpperCase() + item.type.slice(1) %>
+                </small></p>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info">
+        No media found. <a href="/upload">Upload some</a>!
+      </div>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
