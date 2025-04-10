@@ -1,3 +1,4 @@
+// Fixed database.js
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -25,7 +26,9 @@ async function testConnection() {
   }
 }
 
+// Export both the pool and the testConnection function
 module.exports = {
   pool,
-  testConnection
+  testConnection,
+  execute: (...args) => pool.execute(...args)
 };

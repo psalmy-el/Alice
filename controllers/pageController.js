@@ -10,10 +10,16 @@ exports.getHomepage = async (req, res) => {
     // Get all media items for display on homepage
     let allMedia = [];
     let categories = [];
+    let featuredVideo = null;
     
     try {
-      allMedia = await Media.getAll();
-      categories = await Category.getAll();
+      // Load all necessary data
+      [allMedia, categories, featuredVideo] = await Promise.all([
+        Media.getAll(),
+        Category.getAll(),
+        Media.getFeaturedVideo() // New method to get a featured video
+      ]);
+      
       console.log('Database fetch successful');
     } catch (dbError) {
       console.error('Database error:', dbError);
@@ -29,7 +35,6 @@ exports.getHomepage = async (req, res) => {
       name: 'Engdahls & Co Creative Studios',
       description: 'Engdahls & Co Creative Studios is an innovative and versatile production company offering high-quality commercial films and video productions. We create engaging and visually striking stories that help our clients reach their target audiences through creative and tailored solutions.',
       logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg',
-      introVideo: '/uploads/videos/intro-video.mp4', // Changed to a simpler path for testing
       introHeading: 'Movie Productions'
     };
 
@@ -75,7 +80,8 @@ exports.getHomepage = async (req, res) => {
       title: companyInfo.name,
       logoPath: companyInfo.logoPath,
       categories,
-      introVideo: companyInfo.introVideo,
+      // Use the featured video if available, otherwise fall back to a default
+      introVideo: featuredVideo ? featuredVideo.file_path : '/uploads/videos/intro-video.mp4',
       introHeading: companyInfo.introHeading,
       introDescription: companyInfo.description,
       images,
@@ -96,12 +102,29 @@ exports.getHomepage = async (req, res) => {
   }
 };
 
+
 // About page controller
 exports.getAboutPage = (req, res) => {
   console.log('About page route accessed');
+  
+  // Create the about content
+  const aboutContent = [
+    'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+    'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
+  ];
+  
+  // If it's an AJAX request, return just the modal content
+  if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    return res.json({ 
+      aboutText: aboutContent 
+    });
+  }
+  
+  // Otherwise, render the full about page (as fallback)
   res.render('about', {
     title: 'About Us - Engdahls & Co Creative Studios',
-    logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg'
+    logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg',
+    aboutText: aboutContent
   });
 };
 

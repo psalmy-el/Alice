@@ -15,31 +15,73 @@ exports.getUploadForm = async (req, res) => {
   }
 };
 
-// Handle media upload
+// Handle media upload with multiple files
 exports.uploadMedia = async (req, res) => {
   try {
     const { title, description, category_id } = req.body;
-    const file = req.file;
+    const files = req.files;
 
-    if (!file) {
-      return res.status(400).render('error', { message: 'No file uploaded' });
+    // Debug log to see what's being received
+    console.log('Received files:', files);
+    console.log('Received form data:', req.body);
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No files uploaded' 
+      });
     }
 
-    const type = file.mimetype.startsWith('image/') ? 'image' : 'video';
-    const filePath = '/' + path.relative('public', file.path).replace(/\\/g, '/');
+    // Determine the type from the first file
+    const type = files[0].mimetype.startsWith('image/') ? 'image' : 'video';
     
-    await Media.create({
+    // Create the main media entry
+    const mediaId = await Media.create({
       title,
       description,
-      file_path: filePath,
       type,
       category_id
     });
 
-    res.redirect('/dashboard');
+    // Process all files
+    const processedFiles = files.map(file => {
+      const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
+      return {
+        path: '/' + relativePath
+      };
+    });
+
+    // Add files to the media entry
+    await Media.addFiles(mediaId, processedFiles);
+
+    // Return success response
+    res.json({
+      success: true,
+      message: 'Media uploaded successfully',
+      mediaId: mediaId
+    });
   } catch (error) {
     console.error('Error uploading media:', error);
-    res.status(500).render('error', { message: 'Failed to upload media' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to upload media: ' + error.message 
+    });
+  }
+};
+
+// Display media details
+exports.getMediaDetails = async (req, res) => {
+  try {
+    const media = await Media.getById(req.params.id);
+    
+    if (!media) {
+      return res.status(404).render('error', { message: 'Media not found' });
+    }
+
+    res.render('media-details', { media });
+  } catch (error) {
+    console.error('Error fetching media details:', error);
+    res.status(500).render('error', { message: 'Failed to load media details' });
   }
 };
 
@@ -66,73 +108,147 @@ exports.updateMedia = async (req, res) => {
     const { title, description, category_id } = req.body;
     const id = req.params.id;
     
-    // Basic update data
-    const updateData = {
+    // Update basic media information
+    await Media.update(id, {
       title,
       description,
       category_id
-    };
+    });
     
-    // If a new file was uploaded, add the file path and type
-    if (req.file) {
-      const type = req.file.mimetype.startsWith('image/') ? 'image' : 'video';
-      const filePath = '/' + path.relative('public', req.file.path).replace(/\\/g, '/');
+    // If new files were uploaded, add them
+    if (req.files && req.files.length > 0) {
+      const processedFiles = req.files.map(file => {
+        const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
+        return {
+          path: '/' + relativePath
+        };
+      });
       
-      // Add file info to the update data
-      updateData.file_path = filePath;
-      updateData.type = type;
-      
-      // Get the old file path for potential deletion
-      const oldFilePath = await Media.getFilePath(id);
-      
-      // Update the database with all data including the new file
-      await Media.updateWithFile(id, updateData);
-      
-      // Optionally delete the old file
-      try {
-        if (oldFilePath) {
-          await fs.unlink(path.join(__dirname, '../public', oldFilePath));
-        }
-      } catch (fileError) {
-        console.error('Error deleting old file:', fileError);
-        // Continue even if file deletion fails
-      }
-    } else {
-      // Update without changing the file
-      await Media.update(id, updateData);
+      await Media.addNewFiles(id, processedFiles);
     }
 
-    res.redirect('/dashboard');
+    res.json({
+      success: true,
+      message: 'Media updated successfully'
+    });
   } catch (error) {
     console.error('Error updating media:', error);
-    res.status(500).render('error', { message: 'Failed to update media' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update media: ' + error.message 
+    });
+  }
+};
+
+// Get all files for a specific media
+exports.getMediaFiles = async (req, res) => {
+  try {
+    const mediaId = req.params.id;
+    const media = await Media.getById(mediaId);
+    
+    if (!media) {
+      return res.status(404).json({
+        success: false,
+        message: 'Media not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      files: media.files
+    });
+  } catch (error) {
+    console.error('Error fetching media files:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch media files: ' + error.message 
+    });
   }
 };
 
 // Delete media
 exports.deleteMedia = async (req, res) => {
   try {
-    const filePath = await Media.getFilePath(req.params.id);
+    const filePaths = await Media.delete(req.params.id);
     
-    if (!filePath) {
-      return res.status(404).render('error', { message: 'Media not found' });
+    if (!filePaths || filePaths.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Media not found'
+      });
     }
 
-    // Delete from database
-    await Media.delete(req.params.id);
+    // Delete files from filesystem
+    for (const filePath of filePaths) {
+      try {
+        await fs.unlink(path.join(__dirname, '../public', filePath));
+      } catch (fileError) {
+        console.error('Error deleting file:', fileError, filePath);
+        // Continue even if file deletion fails
+      }
+    }
     
-    // Delete file from filesystem (optional - uncomment if you want to delete files)
+    res.json({
+      success: true,
+      message: 'Media deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting media:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete media: ' + error.message 
+    });
+  }
+};
+
+// Delete specific file from media
+exports.deleteFile = async (req, res) => {
+  try {
+    const filePath = await Media.deleteFile(req.params.fileId);
+    
+    if (!filePath) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found'
+      });
+    }
+
+    // Delete the file from filesystem
     try {
       await fs.unlink(path.join(__dirname, '../public', filePath));
     } catch (fileError) {
-      console.error('Error deleting file:', fileError);
+      console.error('Error deleting file from filesystem:', fileError);
       // Continue even if file deletion fails
     }
     
-    res.redirect('/dashboard');
+    res.json({
+      success: true,
+      message: 'File deleted successfully'
+    });
   } catch (error) {
-    console.error('Error deleting media:', error);
-    res.status(500).render('error', { message: 'Failed to delete media' });
+    console.error('Error deleting file:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete file: ' + error.message 
+    });
+  }
+};
+
+// Set primary file
+exports.setPrimaryFile = async (req, res) => {
+  try {
+    await Media.setPrimaryFile(req.params.fileId, req.params.mediaId);
+    
+    res.json({
+      success: true,
+      message: 'Primary file set successfully'
+    });
+  } catch (error) {
+    console.error('Error setting primary file:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to set primary file: ' + error.message 
+    });
   }
 };
 
@@ -144,6 +260,9 @@ exports.filterByCategory = async (req, res) => {
     res.json(media);
   } catch (error) {
     console.error('Error filtering media by category:', error);
-    res.status(500).json({ error: 'Failed to filter media' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to filter media: ' + error.message 
+    });
   }
 };

@@ -1,23 +1,3 @@
-// // models/categoryModel.js
-// const { pool } = require('../config/database');
-
-// class Category {
-//   // Get all categories
-//   static async getAll() {
-//     const [rows] = await pool.query('SELECT * FROM categories ORDER BY name');
-//     return rows;
-//   }
-
-//   // Get category by id
-//   static async getById(id) {
-//     const [rows] = await pool.query('SELECT * FROM categories WHERE id = ?', [id]);
-//     return rows[0];
-//   }
-// }
-
-// module.exports = Category;
-
-// models/categoryModel.js
 const { pool } = require('../config/database');
 
 class Category {

@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Filter grid items
             gridItems.forEach(item => {
-                const itemCategory = item.querySelector('.grid-item-category').textContent;
+                const itemCategory = item.getAttribute('data-category');
                 
                 if (selectedCategory === 'all' || selectedCategory === itemCategory) {
                     item.classList.remove('hidden-item');
@@ -350,35 +350,93 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Add this to your main JavaScript file or in a script tag at the end of your template
 document.addEventListener('DOMContentLoaded', function() {
-    // About modal functionality
-    const aboutLinks = document.querySelectorAll('a[href="/about"]');
-    const aboutModal = document.querySelector('.about-modal');
-    const closeModalButtons = document.querySelectorAll('.close-modal');
+    // Get modal elements
+    const aboutModal = document.getElementById('aboutModal');
+    const aboutLinks = document.querySelectorAll('.about-link, a[href="/about"]');
+    const closeButtons = document.querySelectorAll('[data-bs-dismiss="modal"], .btn-close, .modal .btn-secondary');
     
-    // Open about modal when About link is clicked
-    aboutLinks.forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault(); // Prevent navigation to /about route
-        aboutModal.classList.add('active');
+    if (!aboutModal) {
+        console.error('About modal not found in the document');
+        return;
+    }
+    
+    // Function to open modal
+    function openModal() {
+        // Create backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade';
+        document.body.appendChild(backdrop);
+        
+        // Show modal with animation
+        aboutModal.style.display = 'block';
         document.body.classList.add('modal-open');
-      });
+        
+        // Trigger reflow for animations
+        void backdrop.offsetWidth;
+        void aboutModal.offsetWidth;
+        
+        // Add show classes for animation
+        backdrop.classList.add('show');
+        aboutModal.classList.add('show');
+    }
+    
+    // Function to close modal
+    function closeModal() {
+        // Remove show class first (for animation)
+        aboutModal.classList.remove('show');
+        
+        // Find and remove backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.classList.remove('show');
+            
+            // Wait for animation to complete
+            setTimeout(function() {
+                aboutModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            }, 150); // Match the CSS transition time
+        } else {
+            // No backdrop found, just hide the modal
+            aboutModal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+    }
+    
+    // Add click event for About links
+    aboutLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
     });
     
-    // Close modal when close button is clicked
-    closeModalButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        aboutModal.classList.remove('active');
-        document.body.classList.remove('modal-open');
-      });
+    // Add click event for close buttons
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal();
+        });
     });
     
-    // Close modal when clicking outside the content
-    aboutModal.addEventListener('click', function(e) {
-      if (e.target === aboutModal) {
-        aboutModal.classList.remove('active');
-        document.body.classList.remove('modal-open');
-      }
+    // Close modal when clicking outside of modal content
+    window.addEventListener('click', function(e) {
+        if (e.target === aboutModal) {
+            closeModal();
+        }
     });
     
-  });
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && aboutModal.classList.contains('show')) {
+            closeModal();
+        }
+    });
+    
+    // Prevent adding multiple event listeners if page is refreshed/reloaded
+    aboutModal.setAttribute('data-initialized', 'true');
+});

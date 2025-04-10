@@ -3,11 +3,19 @@ const express = require('express');
 const path = require('path');
 const multer = require('multer');
 const methodOverride = require('method-override');
-const { pool, testConnection } = require('./config/database'); // Import your database module
+const { pool, testConnection } = require('./config/database'); 
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
+const flash = require('connect-flash');
+
+require('dotenv').config();
+
+
 
 // Import routes
 const pageRoutes = require('./routes/pageRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +29,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+
+// Session store options
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  clearExpired: true,
+  checkExpirationInterval: 900000, // 15 minutes
+  expiration: 86400000 // 24 hours
+});
+
+// Session configuration
+app.use(session({
+  key: 'media_admin_sid',
+  secret: process.env.SESSION_SECRET,
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 86400000, // 24 hours
+    httpOnly: true
+  }
+}));
+
+// Flash messages
+app.use(flash());
+
+// Auth middleware for templates
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = !!req.session.adminId;
+  res.locals.currentUser = req.session.adminUsername;
+  next();
+});
+
 
 // Routes
 app.use('/', pageRoutes);

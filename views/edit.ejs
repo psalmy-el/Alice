@@ -7,33 +7,102 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    #preview {
-      max-width: 100%;
-      height: 300px;
+    #previews {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .preview-item {
+      width: 150px;
+      height: 150px;
+      border: 1px solid #ccc;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
-      border: 2px solid #ccc;
+      position: relative;
       overflow: hidden;
     }
-    #preview img, #preview video {
+    .preview-item img, .preview-item video {
       max-width: 100%;
       max-height: 100%;
+      object-fit: cover;
+    }
+    .remove-preview {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .upload-area {
+      height: 150px;
+      border: 2px dashed #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .primary-badge {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 2px 5px;
+      font-size: 10px;
+      border-radius: 3px;
+    }
+    /* Custom styles for notification modal */
+    .notification-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .notification-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 5px;
+      max-width: 400px;
+      text-align: center;
+    }
+    .success-icon {
+      color: #28a745;
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .error-icon {
+      color: #dc3545;
+      font-size: 48px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-      <a class="navbar-brand" href="/">Media Admin</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="/">Dashboard</a>
+            <a class="nav-link" href="/dashboard">Dashboard</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/upload">Upload New</a>
@@ -51,18 +120,50 @@
             <h4 class="mb-0">Edit Media</h4>
           </div>
           <div class="card-body">
-            <div id="preview">
-              <% if (media.type === 'image') { %>
-                <img src="<%= media.file_path %>" alt="<%= media.title %>">
+            <!-- Display current files with delete option -->
+            <h5 class="mb-3">Current Files</h5>
+            <div id="currentFiles" class="mb-4">
+              <% if (media.files && media.files.length > 0) { %>
+                <div id="previews" class="mb-3">
+                  <% media.files.forEach((file, index) => { %>
+                    <div class="preview-item" data-file-id="<%= file.id %>">
+                      <% if (media.type === 'image') { %>
+                        <img src="<%= file.file_path %>" alt="Media file">
+                      <% } else { %>
+                        <video controls>
+                          <source src="<%= file.file_path %>" type="video/mp4">
+                          Your browser does not support the video tag.
+                        </video>
+                      <% } %>
+                      <button type="button" class="remove-preview delete-file-btn" data-file-id="<%= file.id %>">
+                        <i class="fas fa-times"></i>
+                      </button>
+                      <% if (file.is_primary == 1) { %>
+                        <div class="primary-badge">Primary</div>
+                      <% } else { %>
+                        <button type="button" class="primary-badge set-primary-btn" data-file-id="<%= file.id %>" data-media-id="<%= media.id %>">
+                          Set as Primary
+                        </button>
+                      <% } %>
+                    </div>
+                  <% }); %>
+                </div>
               <% } else { %>
-                <video controls>
-                  <source src="<%= media.file_path %>" type="video/mp4">
-                  Your browser does not support the video tag.
-                </video>
+                <div class="alert alert-info">No files associated with this media</div>
               <% } %>
             </div>
+
+            <!-- Upload new files -->
+            <h5 class="mb-3">Add New Files</h5>
+            <div class="upload-area" id="uploadArea">
+              <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+              <p>Drop files here or click to select multiple files</p>
+              <input type="file" id="mediaFiles" multiple accept="image/*,video/*" style="display: none;">
+            </div>
             
-            <form action="/edit/<%= media.id %>?_method=PUT" method="POST">
+            <div id="newFilePreviews" class="mb-3"></div>
+            
+            <form id="editForm">
               <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
                 <input type="text" class="form-control" id="title" name="title" value="<%= media.title %>" required>
@@ -85,12 +186,6 @@
                 </select>
               </div>
               
-              <div class="mb-3">
-                <p class="text-muted">
-                  <i class="fas fa-info-circle"></i> To change the media file, please delete this entry and upload a new one.
-                </p>
-              </div>
-              
               <div class="text-end">
                 <a href="/" class="btn btn-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-warning">Update</button>
@@ -102,6 +197,236 @@
     </div>
   </div>
   
+  <!-- Notification Modal -->
+  <div class="notification-modal" id="notificationModal">
+    <div class="notification-content">
+      <div id="successIcon" class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div id="errorIcon" class="error-icon" style="display: none;">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <h4 id="notificationTitle">Success</h4>
+      <p id="notificationMessage">Your media has been updated successfully!</p>
+      <button class="btn btn-primary" onclick="closeNotification()">OK</button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const mediaFilesInput = document.getElementById('mediaFiles');
+    const newFilePreviewsContainer = document.getElementById('newFilePreviews');
+    const editForm = document.getElementById('editForm');
+    
+    // Track new files 
+    let newFiles = [];
+    
+    // Handle click on upload area
+    uploadArea.addEventListener('click', () => {
+      mediaFilesInput.click();
+    });
+    
+    // Handle drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#007bff';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '#ccc';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#ccc';
+      if (e.dataTransfer.files.length) {
+        handleFiles(e.dataTransfer.files);
+      }
+    });
+    
+    // Handle file selection
+    mediaFilesInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFiles(e.target.files);
+      }
+    });
+    
+    // Process selected files
+    function handleFiles(filesList) {
+      // Add new files to existing files array
+      for (let i = 0; i < filesList.length; i++) {
+        if (filesList[i].type.startsWith('image/') || filesList[i].type.startsWith('video/')) {
+          newFiles.push(filesList[i]);
+        }
+      }
+      
+      // Clear previews and recreate them
+      newFilePreviewsContainer.innerHTML = '';
+      
+      // Create previews for all files
+      newFiles.forEach((file, index) => {
+        createPreview(file, index);
+      });
+    }
+    
+    // Create preview for a file
+    function createPreview(file, index) {
+      const reader = new FileReader();
+      const previewItem = document.createElement('div');
+      previewItem.className = 'preview-item';
+      previewItem.dataset.index = index;
+      
+      reader.onload = function(event) {
+        if (file.type.startsWith('image/')) {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          previewItem.appendChild(img);
+        } else if (file.type.startsWith('video/')) {
+          const video = document.createElement('video');
+          video.controls = true;
+          const source = document.createElement('source');
+          source.src = event.target.result;
+          source.type = file.type;
+          video.appendChild(source);
+          previewItem.appendChild(video);
+        }
+        
+        // Add remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-preview';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeNewFile(index);
+        });
+        previewItem.appendChild(removeBtn);
+        
+        newFilePreviewsContainer.appendChild(previewItem);
+      };
+      
+      reader.readAsDataURL(file);
+    }
+    
+    // Remove a new file
+    function removeNewFile(index) {
+      newFiles.splice(index, 1);
+      
+      // Regenerate all previews to keep index alignment
+      newFilePreviewsContainer.innerHTML = '';
+      newFiles.forEach((file, i) => {
+        createPreview(file, i);
+      });
+    }
+    
+    // Show notification
+    function showNotification(isSuccess, title, message) {
+      document.getElementById('successIcon').style.display = isSuccess ? 'block' : 'none';
+      document.getElementById('errorIcon').style.display = isSuccess ? 'none' : 'block';
+      document.getElementById('notificationTitle').textContent = title;
+      document.getElementById('notificationMessage').textContent = message;
+      document.getElementById('notificationModal').style.display = 'flex';
+    }
+    
+   // Close notification
+    function closeNotification() {
+      document.getElementById('notificationModal').style.display = 'none';
+      // Redirect to dashboard if it was a successful update
+      if (document.getElementById('successIcon').style.display === 'block') {
+        window.location.href = '/dashboard';
+      }
+    }
+    
+    // Handle form submission
+    editForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      
+      // Add form fields
+      formData.append('title', document.getElementById('title').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('category_id', document.getElementById('category_id').value);
+      
+      // Add all new files with the same field name
+      newFiles.forEach((file) => {
+        formData.append('files', file);
+      });
+      
+      // Submit using fetch API
+      fetch('/edit/<%= media.id %>', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Server responded with an error status: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          showNotification(true, 'Success', 'Your media has been updated successfully!');
+        } else {
+          showNotification(false, 'Error', data.message || 'Update failed. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Update error:', error);
+        showNotification(false, 'Error', 'Error updating media: ' + error.message);
+      });
+    });
+    
+    // Handle delete file button clicks
+    document.querySelectorAll('.delete-file-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const fileId = this.getAttribute('data-file-id');
+        const previewItem = this.closest('.preview-item');
+        
+        if (confirm('Are you sure you want to delete this file?')) {
+          fetch(`/delete-file/${fileId}`, {
+            method: 'POST'
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              previewItem.remove();
+            } else {
+              alert(data.message || 'Failed to delete file');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to delete file');
+          });
+        }
+      });
+    });
+    
+    // Handle set primary button clicks
+    document.querySelectorAll('.set-primary-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const fileId = this.getAttribute('data-file-id');
+        const mediaId = this.getAttribute('data-media-id');
+        
+        fetch(`/set-primary/${mediaId}/${fileId}`, {
+          method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Refresh the page to show updated primary status
+            window.location.reload();
+          } else {
+            alert(data.message || 'Failed to set primary file');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to set primary file');
+        });
+      });
+    });
+  </script>
 </body>
 </html>

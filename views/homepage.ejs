@@ -22,7 +22,7 @@
                     <button class="close-nav">✕</button>
                     <ul>
                         <li><a href="/">Home</a></li>
-                        <li><a href="/about">About</a></li>
+                        <li><a href="#" class="about-link">About</a></li>
                         <li><a href="/contact">Contact</a></li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle">Categories</a>
@@ -57,31 +57,46 @@
     </section>
 
     <!-- Video Grid Section -->
-    <section class="video-grid-section">
-        <div class="container">
-            <div class="video-grid">
-                <% allMedia.forEach(item => { %>
-                    <div class="grid-item" data-category="<%= item.category_id %>">
-                        <div class="grid-item-inner" <% if(item.type === 'video') { %>data-video-src="<%= item.file_path %>"<% } %>>
-                            <% if(item.type === 'image') { %>
-                                <img src="<%= item.file_path %>" alt="<%= item.title %>">
-                            <% } else { %>
-                                <video preload="metadata" poster="<%= item.file_path.replace('.mp4', '-poster.jpg') %>" muted loop playsinline>
-                                    <source src="<%= item.file_path %>" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                                <div class="play-button"></div>
-                            <% } %>
-                            <div class="grid-item-overlay">
-                                <h3 class="grid-item-title"><%= item.title %></h3>
-                                <p class="grid-item-category"><%= item.category_name %></p>
+<section class="video-grid-section">
+    <div class="container">
+        <div class="video-grid">
+            <% allMedia.forEach(item => { %>
+                <!-- Make sure the data-category attribute is the category_id, not the category name -->
+                <div class="grid-item" data-category="<%= item.category_id %>">
+                    <div class="grid-item-inner" <% if(item.type === 'video') { %>data-video-src="<%= item.file_path %>"<% } %>>
+                        <% if(item.type === 'image') { %>
+                            <img src="<%= item.file_path %>" alt="<%= item.title %>">
+                        <% } else if (item.file_path) { %>
+                            <video preload="metadata" poster="<%= item.file_path.endsWith('.mp4') ? item.file_path.replace('.mp4', '-poster.jpg') : '' %>" muted loop playsinline>
+                                <source src="<%= item.file_path %>" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="play-button"></div>
+                        <% } else { %>
+                            <!-- Handle broken item gracefully -->
+                            <div class="broken-item">
+                                <p>Media unavailable</p>
                             </div>
+                        <% } %>
+                        
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title"><%= item.title %></h3>
+                            <p class="grid-item-category"><%= item.category_name %></p>
                         </div>
                     </div>
-                <% }); %>
-            </div>
+                </div>
+            <% }); %>
         </div>
-    </section>
+    </div>
+</section>
+
+<!-- And make sure the category dropdown has the correct data-category values -->
+<ul class="dropdown-menu">
+    <li><a href="#" data-category="all">All</a></li>
+    <% categories.forEach(category => { %>
+    <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
+    <% }); %>
+</ul>
 
     <!-- Video Modal -->
     <div class="video-modal">
@@ -95,17 +110,29 @@
     </div>
 
     <!-- About Modal -->
-    <div class="about-modal">
-        <div class="modal-content about-content">
-            <button class="close-modal">&times;</button>
-            <h2>About <%= companyName %></h2>
-            <div class="about-text">
-                <% aboutText.forEach(paragraph => { %>
-                    <p><%= paragraph %></p>
-                <% }); %>
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="aboutModalLabel">About Engdahls & Co</h5>
+              <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
+            <div class="modal-body">
+              <% if (typeof aboutText !== 'undefined' && aboutText.length > 0) { %>
+                <% aboutText.forEach(paragraph => { %>
+                  <p><%= paragraph %></p>
+                <% }); %>
+              <% } else { %>
+                <p>Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.</p>
+                <p>Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.</p>
+              <% } %>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary">Close</button>
+            </div>
+          </div>
         </div>
-    </div>
+      </div>
 
     <!-- Footer -->
     <footer>
