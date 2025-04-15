@@ -98,3 +98,55 @@
     font-size: 48px;
     margin-bottom: 20px;
   }
+
+  /* Add these styles to your /css/upload.css file */
+
+.intro-upload-area {
+  border: 2px dashed #28a745;
+  border-radius: 5px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.intro-upload-area:hover {
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.intro-preview {
+  position: relative;
+  margin-bottom: 1.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 0.5rem;
+}
+
+.current-video-preview {
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Make sure these styles are also in your CSS file */
+.remove-preview {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-preview:hover {
+  background-color: rgba(255, 0, 0, 0.2);
+}

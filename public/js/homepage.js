@@ -129,48 +129,51 @@ gridItems.forEach(item => {
     const video = item.querySelector('video');
     
     if (video) {
-        // Make sure video is paused initially
-        video.pause();
+        // Set poster image as background to ensure something shows
+        if (video.hasAttribute('poster')) {
+            const posterUrl = video.getAttribute('poster');
+            video.style.background = `url(${posterUrl}) no-repeat center center`;
+            video.style.backgroundSize = 'cover';
+        }
         
-        // Play on hover
-        item.addEventListener('mouseenter', function() {
-            // Make sure video is muted to bypass autoplay restrictions
-            video.muted = true;
+        // Ensure video is visible by default
+        video.style.opacity = '1';
+        video.style.visibility = 'visible';
+        
+        // Make sure video is muted for autoplay
+        video.muted = true;
+        
+        // Pause on hover out
+        item.addEventListener('mouseleave', function() {
+            video.pause();
+            video.currentTime = 0;
             
-            // Hide play button immediately on hover
+            // Show play button again
             const playButton = this.querySelector('.play-button');
             if (playButton) {
-                playButton.style.opacity = 0;
+                playButton.style.opacity = '0.8';
+                playButton.style.visibility = 'visible';
+            }
+        });
+        
+        // Play on hover in
+        item.addEventListener('mouseenter', function() {
+            const playPromise = video.play();
+            
+            // Hide play button
+            const playButton = this.querySelector('.play-button');
+            if (playButton) {
+                playButton.style.opacity = '0';
                 playButton.style.visibility = 'hidden';
             }
             
-            // Play the video when cursor enters
-            const playPromise = video.play();
-            
+            // Handle play promise
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
                     console.log('Autoplay was prevented:', error);
                 });
             }
         });
-        
-        // And modify your mouseleave event handler
-        item.addEventListener('mouseleave', function() {
-            const playButton = this.querySelector('.play-button');
-            
-            // Pause the video
-            video.pause();
-            
-            // Reset to beginning
-            video.currentTime = 0;
-            
-            // Show play button again
-            if (playButton) {
-                playButton.style.opacity = 0.8;
-                playButton.style.visibility = 'visible';
-            }
-        });
-
         
         // Open in modal when clicked
         item.addEventListener('click', function(e) {

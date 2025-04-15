@@ -1,7 +1,6 @@
 // server.js - Main application entry point
 const express = require('express');
 const path = require('path');
-const multer = require('multer');
 const methodOverride = require('method-override');
 const { pool, testConnection } = require('./config/database'); 
 const session = require('express-session');
@@ -9,8 +8,6 @@ const MySQLStore = require('express-mysql-session')(session);
 const flash = require('connect-flash');
 
 require('dotenv').config();
-
-
 
 // Import routes
 const pageRoutes = require('./routes/pageRoutes');
@@ -29,7 +26,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
 
 // Session store options
 const sessionStore = new MySQLStore({
@@ -52,7 +48,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     maxAge: 86400000, // 24 hours
-    httpOnly: true
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' // Only set to true in production
   }
 }));
 
@@ -66,37 +63,10 @@ app.use((req, res, next) => {
   next();
 });
 
-
-// Routes
-app.use('/', pageRoutes);
-app.use('/', mediaRoutes);
-
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Determine destination based on file type
-    const isImage = file.mimetype.startsWith('image/');
-    const dest = isImage ? './public/uploads/images' : './public/uploads/videos';
-    cb(null, dest);
-  },
-  filename: function (req, file, cb) {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const extension = file.originalname.split('.').pop();
-    cb(null, file.fieldname + '-' + uniqueSuffix + '.' + extension);
-  }
-});
-
-const upload = multer({ storage: storage });
-
-// Add middlewares
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method')); // For handling DELETE requests from forms
-
-// Set up route for file uploads
-app.post('/upload', upload.single('file'), pageRoutes);
-app.post('/edit/:id', upload.single('file'), pageRoutes);
+// Routes - order matters here; put auth routes first
+app.use('/', authRoutes);  // Authentication routes
+app.use('/', pageRoutes);  // Page routes
+app.use('/', mediaRoutes); // Media routes
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -108,10 +78,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start server and test database connection
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Server running on port ${PORT}`);
-  
-  // Test database connection after server starts
   try {
     const connected = await testConnection();
     if (connected) {

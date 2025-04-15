@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/imagesloaded/4.1.4/imagesloaded.pkgd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/homepage.css">
 
     <title><%= title %></title>
@@ -57,39 +58,47 @@
     </section>
 
     <!-- Video Grid Section -->
-<section class="video-grid-section">
-    <div class="container">
-        <div class="video-grid">
-            <% allMedia.forEach(item => { %>
-                <!-- Make sure the data-category attribute is the category_id, not the category name -->
-                <div class="grid-item" data-category="<%= item.category_id %>">
-                    <div class="grid-item-inner" <% if(item.type === 'video') { %>data-video-src="<%= item.file_path %>"<% } %>>
+    <section class="video-grid-section" id="video-grid-section">
+        <div class="container">
+            <div class="video-grid">
+                <% allMedia.forEach(item => { %>
+                    <!-- Make sure the data-category attribute is the category_id, not the category name -->
+                    <div class="grid-item" data-category="<%= item.category_id %>">
                         <% if(item.type === 'image') { %>
-                            <img src="<%= item.file_path %>" alt="<%= item.title %>">
-                        <% } else if (item.file_path) { %>
-                            <video preload="metadata" poster="<%= item.file_path.endsWith('.mp4') ? item.file_path.replace('.mp4', '-poster.jpg') : '' %>" muted loop playsinline>
-                                <source src="<%= item.file_path %>" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                            <div class="play-button"></div>
-                        <% } else { %>
-                            <!-- Handle broken item gracefully -->
-                            <div class="broken-item">
-                                <p>Media unavailable</p>
+                            <!-- For images, link to the gallery page -->
+                            <a href="/gallery/<%= item.id %>" class="grid-item-inner">
+                                <img src="<%= item.file_path %>" alt="<%= item.title %>">
+                                <div class="grid-item-overlay">
+                                    <h3 class="grid-item-title"><%= item.title %></h3>
+                                    <p class="grid-item-category"><%= item.category_name %></p>
+                                </div>
+                            </a>
+                        <% } else if(item.type === 'video') { %>
+                            <!-- For videos, keep the current behavior -->
+                            <div class="grid-item-inner" data-video-src="<%= item.file_path %>">
+                                <% if (item.file_path) { %>
+                                    <video preload="metadata" poster="<%= item.file_path.endsWith('.mp4') ? item.file_path.replace('.mp4', '-poster.jpg') : '' %>" muted loop playsinline>
+                                        <source src="<%= item.file_path %>" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <div class="play-button"></div>
+                                <% } else { %>
+                                    <!-- Handle broken item gracefully -->
+                                    <div class="broken-item">
+                                        <p>Media unavailable</p>
+                                    </div>
+                                <% } %>
+                                <div class="grid-item-overlay">
+                                    <h3 class="grid-item-title"><%= item.title %></h3>
+                                    <p class="grid-item-category"><%= item.category_name %></p>
+                                </div>
                             </div>
                         <% } %>
-                        
-                        <div class="grid-item-overlay">
-                            <h3 class="grid-item-title"><%= item.title %></h3>
-                            <p class="grid-item-category"><%= item.category_name %></p>
-                        </div>
                     </div>
-                </div>
-            <% }); %>
+                <% }); %>
+            </div>
         </div>
-    </div>
-</section>
-
+    </section>
 <!-- And make sure the category dropdown has the correct data-category values -->
 <ul class="dropdown-menu">
     <li><a href="#" data-category="all">All</a></li>
@@ -132,33 +141,22 @@
             </div>
           </div>
         </div>
-      </div>
+    </div>
 
     <!-- Footer -->
     <footer>
         <div class="footer-container">
-            <!-- Column 1: About -->
-            <div class="footer-column">
-                <h3>About Us</h3>
-                <p><%= footerAbout %></p>
-                <div class="social-links">
-                    <% socialLinks.forEach(social => { %>
-                        <a href="<%= social.url %>" class="social-link"><img src="<%= social.icon %>" alt="<%= social.name %>"></a>
-                    <% }); %>
-                </div>
-            </div>
-    
-            <!-- Column 2: Quick Links -->
+            <!-- Column 1: Quick Links -->
             <div class="footer-column">
                 <h3>Quick Links</h3>
                 <ul class="footer-links">
                     <% quickLinks.forEach(link => { %>
-                        <li><a href="<%= link.url %>"><%= link.name %></a></li>
+                        <li><a href="<%= link.url %>" <% if(link.class) { %>class="<%= link.class %>"<% } %>><%= link.name %></a></li>
                     <% }); %>
                 </ul>
             </div>
     
-            <!-- Column 3: Services -->
+            <!-- Column 2: Services -->
             <div class="footer-column">
                 <h3>Our Services</h3>
                 <ul class="footer-links">
@@ -168,7 +166,7 @@
                 </ul>
             </div>
      
-            <!-- Column 4: Contact Info -->
+            <!-- Column 3: Contact Info (now with social icons) -->
             <div class="footer-column">
                 <h3>Contact Us</h3>
                 <% contactInfo.forEach(info => { %>
@@ -177,6 +175,14 @@
                         <span class="contact-info-text"><%= info.text %></span>
                     </div>
                 <% }); %>
+                <!-- Social links moved to contact section -->
+                <div class="social-links">
+                    <% socialLinks.forEach(function(link) { %>
+                      <a href="<%= link.url %>" class="social-link" title="<%= link.name %>" target="_blank" rel="noopener">
+                        <i class="<%= link.icon %>"></i>
+                      </a>
+                    <% }); %>
+                </div>
             </div>
         </div>
     

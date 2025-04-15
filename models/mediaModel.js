@@ -196,19 +196,43 @@ class Media {
   }
 
   // Get a featured video for the intro section
-  static async getFeaturedVideo() {
-    const query = `
-      SELECT m.*, mf.file_path
-      FROM media m
-      JOIN media_files mf ON m.id = mf.media_id
-      WHERE m.type = 'video' AND mf.is_primary = 1
-      ORDER BY m.created_at DESC
-      LIMIT 1
+static async getFeaturedVideo() {
+  const query = `
+    SELECT m.*, mf.file_path
+    FROM media m
+    JOIN media_files mf ON m.id = mf.media_id
+    WHERE m.type = 'video' AND m.is_intro = 1 AND mf.is_primary = 1
+    LIMIT 1
+  `;
+  
+  const [rows] = await db.execute(query);
+  return rows.length > 0 ? rows[0] : null;
+}
+
+  
+  static async setAsIntroVideo(mediaId) {
+  try {
+    // First, unset any existing intro video
+    const unsetQuery = `
+      UPDATE media SET is_intro = 0 WHERE is_intro = 1
     `;
     
-    const [rows] = await db.execute(query);
-    return rows.length > 0 ? rows[0] : null;
+    // Then set the new intro video
+    const setQuery = `
+      UPDATE media SET is_intro = 1 WHERE id = ?
+    `;
+    
+    // Execute both queries in sequence
+    await db.execute(unsetQuery);
+    await db.execute(setQuery, [mediaId]);
+    
+    console.log(`Successfully set media ID ${mediaId} as intro video`);
+    return true;
+  } catch (error) {
+    console.error('Error setting intro video:', error);
+    throw error;
   }
+}
 
 }
 

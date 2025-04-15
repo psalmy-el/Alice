@@ -20,10 +20,12 @@ exports.uploadMedia = async (req, res) => {
   try {
     const { title, description, category_id } = req.body;
     const files = req.files;
+    const isIntro = req.body.is_intro === 'true';
 
     // Debug log to see what's being received
     console.log('Received files:', files);
     console.log('Received form data:', req.body);
+    console.log('Is intro video:', isIntro);
 
     if (!files || files.length === 0) {
       return res.status(400).json({ 
@@ -53,6 +55,12 @@ exports.uploadMedia = async (req, res) => {
 
     // Add files to the media entry
     await Media.addFiles(mediaId, processedFiles);
+    
+    // Set as intro video if requested and it's a video
+    if (isIntro && type === 'video') {
+      await Media.setAsIntroVideo(mediaId);
+      console.log(`Set media ID ${mediaId} as intro video`);
+    }
 
     // Return success response
     res.json({

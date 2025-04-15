@@ -17,13 +17,19 @@ exports.getHomepage = async (req, res) => {
       [allMedia, categories, featuredVideo] = await Promise.all([
         Media.getAll(),
         Category.getAll(),
-        Media.getFeaturedVideo() // New method to get a featured video
+        Media.getFeaturedVideo() // Method to get a featured video
       ]);
       
       console.log('Database fetch successful');
     } catch (dbError) {
       console.error('Database error:', dbError);
       // Continue with empty arrays
+    }
+    
+    // Filter out the intro video from allMedia if it exists
+    // This ensures the intro video doesn't appear in the masonry grid
+    if (featuredVideo) {
+      allMedia = allMedia.filter(item => item.id !== featuredVideo.id);
     }
        
     // Separate images and videos
@@ -40,27 +46,24 @@ exports.getHomepage = async (req, res) => {
 
     // Footer content
     const footerContent = {
-      about: 'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
       socialLinks: [
-        { name: 'Facebook', url: '#', icon: '/uploads/images/facebook-icon.png' },
-        { name: 'YouTube', url: '#', icon: '/uploads/images/youtube-icon.png' },
-        { name: 'Instagram', url: '#', icon: '/uploads/images/instagram-icon.png' }
+        { name: 'Facebook', url: '#', icon: 'fab fa-facebook-f' },
+        { name: 'YouTube', url: '#', icon: 'fab fa-youtube' },
+        { name: 'Instagram', url: '#', icon: 'fab fa-instagram' }
       ],
       quickLinks: [
         { name: 'Home', url: '/' },
         { name: 'About', url: '/about' },
-        { name: 'Portfolio', url: '/portfolio' },
-        { name: 'Videos', url: '/videos' },
-        { name: 'Services', url: '/services' },
         { name: 'Contact', url: '/contact' }
       ],
       services: [
-        { name: 'Commercial Production', url: '/services#commercial' },
-        { name: 'Brand Films', url: '/services#brand' },
-        { name: 'Documentary', url: '/services#documentary' },
-        { name: 'Corporate Videos', url: '/services#corporate' },
-        { name: 'Motion Graphics', url: '/services#motion' },
-        { name: 'Social Media Content', url: '/services#social' }
+        { name: 'Commercial Production', url: '#video-grid-section' },
+        { name: 'Brand Films', url: '#video-grid-section' },
+        { name: 'Documentary', url: '#video-grid-section' },
+        { name: 'Corporate Videos', url: '#video-grid-section' },
+        { name: 'Motion Graphics', url: '#video-grid-section' },
+        { name: 'Social Media Content', url: '#video-grid-section' },
+        { name: 'Music Videos', url: '#video-grid-section' }
       ],
       contactInfo: [
         { icon: '📍', text: '123 Creative Avenue, Studio City, CA 90210' },
@@ -72,6 +75,18 @@ exports.getHomepage = async (req, res) => {
     // About modal content
     const aboutContent = [
       'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
       'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
     ];
 
@@ -86,7 +101,7 @@ exports.getHomepage = async (req, res) => {
       introDescription: companyInfo.description,
       images,
       videos,
-      allMedia,
+      allMedia, // This now excludes the intro video
       companyName: companyInfo.name,
       aboutText: aboutContent,
       footerAbout: footerContent.about,
@@ -101,7 +116,6 @@ exports.getHomepage = async (req, res) => {
     res.status(500).render('error', { message: 'Failed to load homepage' });
   }
 };
-
 
 // About page controller
 exports.getAboutPage = (req, res) => {
@@ -206,5 +220,44 @@ exports.getEditPage = (req, res) => {
   } catch (error) {
     console.error('Error loading edit page:', error);
     res.status(500).render('error', { message: 'Failed to load edit page' });
+  }
+};
+
+
+// Gallery page controller
+exports.getGalleryPage = async (req, res) => {
+  console.log('Gallery page route accessed');
+  try {
+    const mediaId = req.params.id;
+    
+    // Get the media item with all its files
+    const media = await Media.getById(mediaId);
+    
+    if (!media) {
+      return res.status(404).render('error', { message: 'Media not found' });
+    }
+    
+    // Make sure this is an image media type
+    if (media.type !== 'image') {
+      return res.status(400).render('error', { message: 'Gallery view is only available for images' });
+    }
+    
+    // Check if the media has any files
+    if (!media.files || media.files.length === 0) {
+      return res.status(404).render('error', { message: 'No images found for this media' });
+    }
+    
+    // Get the company logo for the header
+    const logoPath = '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg';
+    
+    // Render the gallery template with the media data
+    res.render('image-gallery', { 
+      title: `${media.title} - Engdahls & Co Creative Studios`,
+      media,
+      logoPath
+    });
+  } catch (error) {
+    console.error('Error loading gallery page:', error);
+    res.status(500).render('error', { message: 'Failed to load gallery page' });
   }
 };

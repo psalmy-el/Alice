@@ -17,14 +17,14 @@ const transporter = nodemailer.createTransport({
 
 // Load email template
 async function loadTemplate(templateName) {
-  const filePath = path.join(__dirname, '../views/emails', `${templateName}.html`);
+  const filePath = path.join(__dirname, '../views', `${templateName}.ejs`);
   const templateContent = await fs.readFile(filePath, 'utf-8');
   return handlebars.compile(templateContent);
 }
 
 // Send password reset email
 exports.sendPasswordReset = async (to, data) => {
-  const template = await loadTemplate('password-reset');
+  const template = await loadTemplate('password-reset-email');
   const html = template(data);
   
   await transporter.sendMail({
@@ -37,7 +37,7 @@ exports.sendPasswordReset = async (to, data) => {
 
 // Send password change notification
 exports.sendPasswordChangeNotification = async (to, data) => {
-  const template = await loadTemplate('password-changed');
+  const template = await loadTemplate('password-changed-email');
   const html = template(data);
   
   await transporter.sendMail({
@@ -50,7 +50,7 @@ exports.sendPasswordChangeNotification = async (to, data) => {
 
 // Send email change notification
 exports.sendEmailChangeNotification = async (to, data) => {
-  const template = await loadTemplate('email-changed');
+  const template = await loadTemplate('email-changed-email');
   const html = template(data);
   
   await transporter.sendMail({
@@ -59,4 +59,4 @@ exports.sendEmailChangeNotification = async (to, data) => {
     subject: 'Your Email Address Has Been Changed',
     html
   });
-};
+};  

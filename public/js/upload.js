@@ -172,6 +172,7 @@ function resetForm() {
   formData.append('title', document.getElementById('title').value);
   formData.append('description', document.getElementById('description').value);
   formData.append('category_id', document.getElementById('category_id').value);
+  formData.append('is_intro', document.getElementById('is_intro').checked);
   
   // Add all files with the same field name
   files.forEach((file) => {
@@ -206,3 +207,4 @@ function resetForm() {
     showNotification(false, 'Error', 'Error uploading file: ' + error.message);
   });
 });
+
