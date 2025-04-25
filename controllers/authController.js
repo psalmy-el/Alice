@@ -37,7 +37,21 @@ exports.login = async (req, res) => {
     req.session.adminId = admin.id;
     req.session.adminUsername = admin.username;
     
-    res.redirect('/dashboard');
+    // Debug session data
+    console.log('Session after login:', {
+      id: req.session.id,
+      adminId: req.session.adminId,
+      adminUsername: req.session.adminUsername
+    });
+    
+    // Explicitly save session before redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+      }
+      console.log('Session saved successfully');
+      res.redirect('/dashboard');
+    });
   } catch (error) {
     console.error('Login error:', error);
     req.flash('error', 'An error occurred during login');

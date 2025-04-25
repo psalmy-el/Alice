@@ -19,15 +19,26 @@ exports.getUploadForm = async (req, res) => {
 exports.uploadMedia = async (req, res) => {
   try {
     const { title, description, category_id } = req.body;
-    const files = req.files;
     const isIntro = req.body.is_intro === 'true';
+    
+    // Validate required fields
+    if (!title || !description || !category_id) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Please fill in all required fields: ${!title ? 'Title, ' : ''}${!description ? 'Description, ' : ''}${!category_id ? 'Category' : ''}`
+      });
+    }
 
-    // Debug log to see what's being received
+    // Handle files from the new multer format
+    const files = req.files.files || [];
+    const posterImage = req.files.posterImage ? req.files.posterImage[0] : null;
+
     console.log('Received files:', files);
     console.log('Received form data:', req.body);
+    console.log('Poster image:', posterImage);
     console.log('Is intro video:', isIntro);
 
-    if (!files || files.length === 0) {
+    if (files.length === 0) {
       return res.status(400).json({ 
         success: false, 
         message: 'No files uploaded' 
@@ -56,10 +67,15 @@ exports.uploadMedia = async (req, res) => {
     // Add files to the media entry
     await Media.addFiles(mediaId, processedFiles);
     
+    // Add poster image if it exists and this is a video
+    if (posterImage && type === 'video') {
+      const posterPath = '/' + path.relative('public', posterImage.path).replace(/\\/g, '/');
+      await Media.addPosterImage(mediaId, posterPath);
+    }
+    
     // Set as intro video if requested and it's a video
     if (isIntro && type === 'video') {
       await Media.setAsIntroVideo(mediaId);
-      console.log(`Set media ID ${mediaId} as intro video`);
     }
 
     // Return success response
@@ -111,42 +127,57 @@ exports.getEditForm = async (req, res) => {
 };
 
 // Handle edit form submission
-exports.updateMedia = async (req, res) => {
-  try {
-    const { title, description, category_id } = req.body;
-    const id = req.params.id;
-    
-    // Update basic media information
-    await Media.update(id, {
-      title,
-      description,
-      category_id
-    });
-    
-    // If new files were uploaded, add them
-    if (req.files && req.files.length > 0) {
-      const processedFiles = req.files.map(file => {
-        const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
-        return {
-          path: '/' + relativePath
-        };
+  exports.updateMedia = async (req, res) => {
+    try {
+      const { title, description, category_id } = req.body;
+      const id = req.params.id;
+      
+      // Validate required fields
+      if (!title || !description || !category_id) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Please fill in all required fields: ${!title ? 'Title, ' : ''}${!description ? 'Description, ' : ''}${!category_id ? 'Category' : ''}`
+        });
+      }
+      
+      // Update basic media information
+      await Media.update(id, {
+        title,
+        description,
+        category_id
       });
       
-      await Media.addNewFiles(id, processedFiles);
+      // If new files were uploaded, add them
+      if (req.files.files && req.files.files.length > 0) {
+        const processedFiles = req.files.files.map(file => {
+          const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
+          return {
+            path: '/' + relativePath
+          };
+        });
+        
+        await Media.addNewFiles(id, processedFiles);
+      }
+      
+      // If a new poster image was uploaded, update it
+      if (req.files.posterImage && req.files.posterImage.length > 0) {
+        const posterImage = req.files.posterImage[0];
+        const posterPath = '/' + path.relative('public', posterImage.path).replace(/\\/g, '/');
+        await Media.addPosterImage(id, posterPath);
+      }
+  
+      res.json({
+        success: true,
+        message: 'Media updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating media:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to update media: ' + error.message 
+      });
     }
-
-    res.json({
-      success: true,
-      message: 'Media updated successfully'
-    });
-  } catch (error) {
-    console.error('Error updating media:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update media: ' + error.message 
-    });
-  }
-};
+  };
 
 // Get all files for a specific media
 exports.getMediaFiles = async (req, res) => {

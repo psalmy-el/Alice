@@ -22,7 +22,6 @@
                 <nav class="main-nav">
                     <button class="close-nav">✕</button>
                     <ul>
-                        <li><a href="/">Home</a></li>
                         <li><a href="#" class="about-link">About</a></li>
                         <li><a href="/contact">Contact</a></li>
                         <li class="dropdown">
@@ -74,13 +73,20 @@
                                 </div>
                             </a>
                         <% } else if(item.type === 'video') { %>
-                            <!-- For videos, keep the current behavior -->
                             <div class="grid-item-inner" data-video-src="<%= item.file_path %>">
                                 <% if (item.file_path) { %>
-                                    <video preload="metadata" poster="<%= item.file_path.endsWith('.mp4') ? item.file_path.replace('.mp4', '-poster.jpg') : '' %>" muted loop playsinline>
-                                        <source src="<%= item.file_path %>" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
+                                    <% if(item.type === 'video') { %>
+                                        <% if (item.file_path) { %>
+                                            <video <% if (item.poster_image) { %>poster="<%= item.poster_image %>"<% } %>>
+                                                <source src="<%= item.file_path %>" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                              </video>
+                                        <% } else { %>
+                                          <div class="media-placeholder">
+                                            <span>Media unavailable</span>
+                                          </div>
+                                        <% } %>
+                                      <% } %>
                                     <div class="play-button"></div>
                                 <% } else { %>
                                     <!-- Handle broken item gracefully -->
@@ -124,8 +130,9 @@
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="aboutModalLabel">About Engdahls & Co</h5>
-              <button type="button" class="btn-close" aria-label="Close"></button>
+              
             </div>
+            <button type="button" class="btn-close" aria-label="Close"></button>
             <div class="modal-body">
               <% if (typeof aboutText !== 'undefined' && aboutText.length > 0) { %>
                 <% aboutText.forEach(paragraph => { %>

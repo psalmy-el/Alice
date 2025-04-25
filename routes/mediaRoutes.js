@@ -25,6 +25,7 @@ const logRequest = (req, res, next) => {
   next();
 };
 
+// Update the multer upload configuration in routes/mediaRoutes.js
 const upload = multer({ 
   storage: storage,
   fileFilter: function(req, file, cb) {
@@ -35,6 +36,18 @@ const upload = multer({
     }
   }
 });
+
+// Update this line to use fields instead of array
+router.post('/upload', isAuthenticated, upload.fields([
+  { name: 'files', maxCount: 10 },
+  { name: 'posterImage', maxCount: 1 }
+]), logRequest, mediaController.uploadMedia);
+
+// Also update the edit route
+router.post('/edit/:id', isAuthenticated, upload.fields([
+  { name: 'files', maxCount: 10 },
+  { name: 'posterImage', maxCount: 1 }
+]), logRequest, mediaController.updateMedia);
 
 
 // Routes 

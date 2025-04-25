@@ -8,7 +8,7 @@
   <div class="container">
     <h1>Error</h1>
     <p><%= message %></p>
-    <% if (process.env.NODE_ENV === 'development' && error) { %>
+    <% if (process.env.NODE_ENV === 'development' && typeof error !== 'undefined' && error) { %>
       <pre><%= error.stack %></pre>
     <% } %>
     <a href="/">Return to Home</a>

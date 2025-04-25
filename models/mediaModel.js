@@ -1,4 +1,3 @@
-// models/mediaModel.js
 const db = require('../config/database');
 
 class Media {
@@ -30,7 +29,7 @@ class Media {
       return db.execute(query, [
         mediaId,
         file.path,
-        index === 0 ? 1 : 0  // Make the first file the primary one
+        index === 0 ? 1 : 0  
       ]);
     });
     
@@ -234,6 +233,22 @@ static async getFeaturedVideo() {
   }
 }
 
+//handle poster images
+static async addPosterImage(mediaId, posterPath) {
+  try {
+    const query = `
+      UPDATE media
+      SET poster_image = ?
+      WHERE id = ?
+    `;
+    
+    await db.execute(query, [posterPath, mediaId]);
+    return true;
+  } catch (error) {
+    console.error('Error adding poster image:', error);
+    throw error;
+  }
+}
 }
 
 

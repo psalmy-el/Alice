@@ -2,14 +2,25 @@ const uploadArea = document.getElementById('uploadArea');
 const mediaFilesInput = document.getElementById('mediaFiles');
 const previewsContainer = document.getElementById('previews');
 const uploadForm = document.getElementById('uploadForm');
+const posterImageGroup = document.getElementById('posterImageGroup');
+const posterImageInput = document.getElementById('posterImage');
+const posterPreviewContainer = document.getElementById('posterPreview');
 
 // Track files 
 let files = [];
+let posterFile = null;
 
 // Handle click on upload area
 uploadArea.addEventListener('click', () => {
   mediaFilesInput.click();
 });
+
+// Show poster image field only when video is selected
+function updateFormForFileTypes() {
+  const hasVideo = files.some(file => file.type.startsWith('video/'));
+  posterImageGroup.style.display = hasVideo ? 'block' : 'none';
+}
+
 
 // Handle drag and drop
 uploadArea.addEventListener('dragover', (e) => {
@@ -52,6 +63,71 @@ mediaFilesInput.addEventListener('change', (e) => {
   files.forEach((file, index) => {
     createPreview(file, index);
   });
+
+  updateFormForFileTypes();
+}
+
+
+// Handle poster image selection
+posterImageInput.addEventListener('change', (e) => {
+  if (e.target.files.length) {
+    posterFile = e.target.files[0];
+    displayPosterPreview(posterFile);
+  }
+});
+
+// Setup poster image drag and drop
+const posterUploadArea = document.querySelector('.poster-upload-area');
+posterUploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  posterUploadArea.style.borderColor = '#007bff';
+});
+
+posterUploadArea.addEventListener('dragleave', () => {
+  posterUploadArea.style.borderColor = '#ccc';
+});
+
+// Handle click on poster upload area
+posterUploadArea.addEventListener('click', () => {
+  posterImageInput.click();
+});
+
+posterUploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  posterUploadArea.style.borderColor = '#ccc';
+  if (e.dataTransfer.files.length) {
+    posterFile = e.dataTransfer.files[0];
+    displayPosterPreview(posterFile);
+  }
+});
+
+function displayPosterPreview(file) {
+  const reader = new FileReader();
+  posterPreviewContainer.innerHTML = '';
+  
+  reader.onload = function(event) {
+    const previewItem = document.createElement('div');
+    previewItem.className = 'preview-item';
+    
+    const img = document.createElement('img');
+    img.src = event.target.result;
+    previewItem.appendChild(img);
+    
+    // Add remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-preview';
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      posterFile = null;
+      posterPreviewContainer.innerHTML = '';
+    });
+    previewItem.appendChild(removeBtn);
+    
+    posterPreviewContainer.appendChild(previewItem);
+  };
+  
+  reader.readAsDataURL(file);
 }
 
 // Create preview for a file
@@ -159,52 +235,67 @@ function resetForm() {
 
   // Handle form submission
   uploadForm.addEventListener('submit', function(e) {
-  e.preventDefault();
-  
-  if (files.length === 0) {
-    showNotification(false, 'Error', 'Please select at least one file to upload');
-    return;
-  }
-  
-  const formData = new FormData();
-  
-  // Add form fields
-  formData.append('title', document.getElementById('title').value);
-  formData.append('description', document.getElementById('description').value);
-  formData.append('category_id', document.getElementById('category_id').value);
-  formData.append('is_intro', document.getElementById('is_intro').checked);
-  
-  // Add all files with the same field name
-  files.forEach((file) => {
-    formData.append('files', file);
-  });
-  
-  // Log the form data entries to help debug
-  for (var pair of formData.entries()) {
-    console.log(pair[0] + ': ' + pair[1]);
-  }
-  
-  // Submit using fetch API
-  fetch('/upload', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Server responded with an error status: ' + response.status);
+    e.preventDefault();
+    
+    // Form validation
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const category_id = document.getElementById('category_id').value;
+    
+    let missingFields = [];
+    if (!title) missingFields.push('Title');
+    if (!description) missingFields.push('Description');
+    if (!category_id || category_id === '-- Select Category --') missingFields.push('Category');
+    if (files.length === 0) missingFields.push('Media Files');
+    
+    if (missingFields.length > 0) {
+      showNotification(false, 'Missing Fields', 'Please fill in the following: ' + missingFields.join(', '));
+      return;
     }
-    return response.json();
-  })
-  .then(data => {
-    if (data.success) {
-      showNotification(true, 'Success', 'Your media has been uploaded successfully!');
-    } else {
-      showNotification(false, 'Error', data.message || 'Upload failed. Please try again.');
+    
+    const formData = new FormData();
+    
+    // Add form fields
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category_id', category_id);
+    formData.append('is_intro', document.getElementById('is_intro').checked);
+    
+    // Add all files with the same field name
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+    
+    // Add poster image if it exists and a video is being uploaded
+    if (posterFile && files.some(file => file.type.startsWith('video/'))) {
+      formData.append('posterImage', posterFile);
     }
-  })
-  .catch(error => {
-    console.error('Upload error:', error);
-    showNotification(false, 'Error', 'Error uploading file: ' + error.message);
+    
+    // Log the form data entries to help debug
+    for (var pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+    
+    // Submit using fetch API
+    fetch('/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Server responded with an error status: ' + response.status);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        showNotification(true, 'Success', 'Your media has been uploaded successfully!');
+      } else {
+        showNotification(false, 'Error', data.message || 'Upload failed. Please try again.');
+      }
+    })
+    .catch(error => {
+      console.error('Upload error:', error);
+      showNotification(false, 'Error', 'Error uploading file: ' + error.message);
+    });
   });
-});
-

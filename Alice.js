@@ -17,6 +17,8 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,16 +44,27 @@ const sessionStore = new MySQLStore({
 // Session configuration
 app.use(session({
   key: 'media_admin_sid',
-  secret: process.env.SESSION_SECRET,
-  store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
+  secret: 'test-secret-for-debugging',
+  // store: sessionStore, // Comment this out
+  resave: true,
+  saveUninitialized: true, // Change to true for testing
   cookie: {
     maxAge: 86400000, // 24 hours
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production' // Only set to true in production
+    secure: false
   }
 }));
+
+// Add this after your session middleware but before your routes
+app.get('/session-test', (req, res) => {
+  if (!req.session.views) {
+    req.session.views = 1;
+    res.send('First visit! Session ID: ' + req.session.id);
+  } else {
+    req.session.views++;
+    res.send('You have viewed this page ' + req.session.views + ' times. Session ID: ' + req.session.id);
+  }
+});
 
 // Flash messages
 app.use(flash());
