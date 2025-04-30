@@ -18,23 +18,28 @@ class Media {
     return result.insertId;
   }
   
-  // Add media files to an existing media entry
   static async addFiles(mediaId, files) {
-    const query = `
-      INSERT INTO media_files (media_id, file_path, is_primary, created_at)
-      VALUES (?, ?, ?, NOW())
-    `;
-    
-    const filePromises = files.map((file, index) => {
-      return db.execute(query, [
-        mediaId,
-        file.path,
-        index === 0 ? 1 : 0  
-      ]);
-    });
-    
-    await Promise.all(filePromises);
-    return true;
+    try {
+      // Instead of using transactions, we'll just execute queries directly
+      const query = `
+        INSERT INTO media_files (media_id, file_path, is_primary, created_at)
+        VALUES (?, ?, ?, NOW())
+      `;
+      
+      // Insert files one by one
+      for (let i = 0; i < files.length; i++) {
+        await db.execute(query, [
+          mediaId,
+          files[i].path,
+          i === 0 ? 1 : 0 // First file is primary
+        ]);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error adding files:', error);
+      throw error;
+    }
   }
 
   // Get all media with their primary file
@@ -195,60 +200,92 @@ class Media {
   }
 
   // Get a featured video for the intro section
-static async getFeaturedVideo() {
-  const query = `
-    SELECT m.*, mf.file_path
-    FROM media m
-    JOIN media_files mf ON m.id = mf.media_id
-    WHERE m.type = 'video' AND m.is_intro = 1 AND mf.is_primary = 1
-    LIMIT 1
-  `;
-  
-  const [rows] = await db.execute(query);
-  return rows.length > 0 ? rows[0] : null;
-}
-
-  
-  static async setAsIntroVideo(mediaId) {
-  try {
-    // First, unset any existing intro video
-    const unsetQuery = `
-      UPDATE media SET is_intro = 0 WHERE is_intro = 1
-    `;
-    
-    // Then set the new intro video
-    const setQuery = `
-      UPDATE media SET is_intro = 1 WHERE id = ?
-    `;
-    
-    // Execute both queries in sequence
-    await db.execute(unsetQuery);
-    await db.execute(setQuery, [mediaId]);
-    
-    console.log(`Successfully set media ID ${mediaId} as intro video`);
-    return true;
-  } catch (error) {
-    console.error('Error setting intro video:', error);
-    throw error;
-  }
-}
-
-//handle poster images
-static async addPosterImage(mediaId, posterPath) {
-  try {
+  static async getFeaturedVideo() {
     const query = `
-      UPDATE media
-      SET poster_image = ?
-      WHERE id = ?
+      SELECT m.*, mf.file_path
+      FROM media m
+      JOIN media_files mf ON m.id = mf.media_id
+      WHERE m.type = 'video' AND m.is_intro = 1 AND mf.is_primary = 1
+      LIMIT 1
     `;
     
-    await db.execute(query, [posterPath, mediaId]);
-    return true;
-  } catch (error) {
-    console.error('Error adding poster image:', error);
-    throw error;
+    const [rows] = await db.execute(query);
+    return rows.length > 0 ? rows[0] : null;
   }
-}
+
+    //handle intro video
+    static async setAsIntroVideo(mediaId) {
+    try {
+      // First, unset any existing intro video
+      const unsetQuery = `
+        UPDATE media SET is_intro = 0 WHERE is_intro = 1
+      `;
+      
+      // Then set the new intro video
+      const setQuery = `
+        UPDATE media SET is_intro = 1 WHERE id = ?
+      `;
+      
+      // Execute both queries in sequence
+      await db.execute(unsetQuery);
+      await db.execute(setQuery, [mediaId]);
+      
+      console.log(`Successfully set media ID ${mediaId} as intro video`);
+      return true;
+    } catch (error) {
+      console.error('Error setting intro video:', error);
+      throw error;
+    }
+  }
+
+  //handle poster images
+  static async addPosterImage(mediaId, posterPath) {
+    try {
+      const query = `
+        UPDATE media
+        SET poster_image = ?, updated_at = NOW()
+        WHERE id = ?
+      `;
+      
+      console.log(`Adding poster image ${posterPath} to media ID ${mediaId}`);
+      await db.execute(query, [posterPath, mediaId]);
+      return true;
+    } catch (error) {
+      console.error('Error adding poster image:', error);
+      throw error;
+    }
+  }
+
+  // Delete all files for a specific media
+  static async deleteAllFiles(mediaId) {
+    try {
+      const query = `
+        DELETE FROM media_files WHERE media_id = ?
+      `;
+      
+      await db.execute(query, [mediaId]);
+      return true;
+    } catch (error) {
+      console.error('Error deleting all files:', error);
+      throw error;
+    }
+  }
+
+  static async updateType(id, type) {
+    try {
+      const query = `
+        UPDATE media
+        SET type = ?
+        WHERE id = ?
+      `;
+      
+      await db.execute(query, [type, id]);
+      return true;
+    } catch (error) {
+      console.error('Error updating media type:', error);
+      throw error;
+    }
+  }
 }
 
 

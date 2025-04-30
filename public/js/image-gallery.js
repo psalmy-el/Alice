@@ -120,16 +120,23 @@ function updateActiveThumbnail(index) {
     });
     thumbnails[index].classList.add('active');
     
-    // Smooth scroll to active thumbnail if needed
+    // Force scroll to first thumbnail if index is 0
     const thumbnailContainer = document.querySelector('.thumbnail-scroll');
     if (thumbnailContainer) {
-        const activeThumb = thumbnails[index];
-        const containerRect = thumbnailContainer.getBoundingClientRect();
-        const activeRect = activeThumb.getBoundingClientRect();
-        
-        // If thumbnail is not fully visible, scroll to it
-        if (activeRect.left < containerRect.left || activeRect.right > containerRect.right) {
-            activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        // For smaller screens, always reset scroll position when showing first image
+        if (index === 0) {
+            setTimeout(() => {
+                thumbnailContainer.scrollLeft = 0;
+            }, 10);
+        } else {
+            const activeThumb = thumbnails[index];
+            const containerRect = thumbnailContainer.getBoundingClientRect();
+            const activeRect = activeThumb.getBoundingClientRect();
+            
+            // If thumbnail is not fully visible, scroll to it
+            if (activeRect.left < containerRect.left || activeRect.right > containerRect.right) {
+                activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
         }
     }
 }
@@ -187,13 +194,6 @@ window.addEventListener('load', function() {
         // Start auto sliding
         let slideInterval = startAutoSlide();
         
-        // Stop auto-sliding when user interacts with gallery
-        document.querySelector('.gallery-container').addEventListener('click', function() {
-            if (slideInterval) {
-                clearInterval(slideInterval);
-                slideInterval = null;
-            }
-        });
     } else {
         console.error("No images found in the images array");
     }

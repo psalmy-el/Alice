@@ -127,57 +127,110 @@ exports.getEditForm = async (req, res) => {
 };
 
 // Handle edit form submission
-  exports.updateMedia = async (req, res) => {
-    try {
-      const { title, description, category_id } = req.body;
-      const id = req.params.id;
-      
-      // Validate required fields
-      if (!title || !description || !category_id) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Please fill in all required fields: ${!title ? 'Title, ' : ''}${!description ? 'Description, ' : ''}${!category_id ? 'Category' : ''}`
-        });
-      }
-      
-      // Update basic media information
-      await Media.update(id, {
-        title,
-        description,
-        category_id
-      });
-      
-      // If new files were uploaded, add them
-      if (req.files.files && req.files.files.length > 0) {
-        const processedFiles = req.files.files.map(file => {
-          const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
-          return {
-            path: '/' + relativePath
-          };
-        });
-        
-        await Media.addNewFiles(id, processedFiles);
-      }
-      
-      // If a new poster image was uploaded, update it
-      if (req.files.posterImage && req.files.posterImage.length > 0) {
-        const posterImage = req.files.posterImage[0];
-        const posterPath = '/' + path.relative('public', posterImage.path).replace(/\\/g, '/');
-        await Media.addPosterImage(id, posterPath);
-      }
-  
-      res.json({
-        success: true,
-        message: 'Media updated successfully'
-      });
-    } catch (error) {
-      console.error('Error updating media:', error);
-      res.status(500).json({ 
+exports.updateMedia = async (req, res) => {
+  try {
+    const { title, description, category_id, replace_files } = req.body;
+    const id = req.params.id;
+    
+    console.log('Update request received:', {
+      id,
+      title,
+      description,
+      category_id,
+      replace_files,
+      hasFiles: req.files && req.files.files ? req.files.files.length : 0,
+      hasPoster: req.files && req.files.posterImage ? true : false
+    });
+    
+    // Validate required fields
+    if (!title || !description || !category_id) {
+      return res.status(400).json({ 
         success: false, 
-        message: 'Failed to update media: ' + error.message 
+        message: `Please fill in all required fields: ${!title ? 'Title, ' : ''}${!description ? 'Description, ' : ''}${!category_id ? 'Category' : ''}`
       });
     }
-  };
+    
+    // Update basic media information
+    await Media.update(id, {
+      title,
+      description,
+      category_id
+    });
+    
+    // If new files were uploaded and replace_files is true
+    if (req.files && req.files.files && req.files.files.length > 0 && replace_files === 'true') {
+      console.log('Processing new files for replacement:', req.files.files.length);
+      
+      // Get existing file paths to delete them from the filesystem
+      const existingMedia = await Media.getById(id);
+      const filePaths = existingMedia.files.map(file => file.file_path);
+      
+      // Delete old files from database
+      await Media.deleteAllFiles(id);
+      
+      // Delete old files from filesystem
+      for (const filePath of filePaths) {
+        try {
+          console.log('Deleting file:', filePath);
+          await fs.unlink(path.join(__dirname, '../public', filePath));
+        } catch (fileError) {
+          console.error('Error deleting old file:', fileError, filePath);
+          // Continue even if file deletion fails
+        }
+      }
+      
+      // Process new files
+      const processedFiles = req.files.files.map(file => {
+        const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
+        return {
+          path: '/' + relativePath
+        };
+      });
+      
+      // Add new files
+      console.log('Adding new files:', processedFiles.length);
+      await Media.addFiles(id, processedFiles);
+      
+      // If this is a video, determine media type
+      if (req.files.files[0].mimetype.startsWith('video/')) {
+        await Media.updateType(id, 'video');
+      } else if (req.files.files[0].mimetype.startsWith('image/')) {
+        await Media.updateType(id, 'image');
+      }
+    }
+    
+    // If a new poster image was uploaded, update it
+    if (req.files && req.files.posterImage && req.files.posterImage.length > 0) {
+      console.log('Processing new poster image');
+      const posterImage = req.files.posterImage[0];
+      const posterPath = '/' + path.relative('public', posterImage.path).replace(/\\/g, '/');
+      
+      // If there's an existing poster, delete it first
+      const existingMedia = await Media.getById(id);
+      if (existingMedia.poster_image) {
+        try {
+          await fs.unlink(path.join(__dirname, '../public', existingMedia.poster_image));
+        } catch (fileError) {
+          console.error('Error deleting old poster image:', fileError);
+          // Continue even if file deletion fails
+        }
+      }
+      
+      await Media.addPosterImage(id, posterPath);
+    }
+
+    res.json({
+      success: true,
+      message: 'Media updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating media:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update media: ' + error.message 
+    });
+  }
+};
 
 // Get all files for a specific media
 exports.getMediaFiles = async (req, res) => {

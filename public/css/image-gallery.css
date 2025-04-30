@@ -294,46 +294,64 @@ h1 {
     text-align: center;
 }
 
+
+@media (max-width: 870px) {
+    .thumbnail-scroll {
+        justify-content: flex-start;  
+        flex-wrap: nowrap;           
+        overflow-x: auto;             
+        padding: 10px 30px;           
+        max-width: calc(100% - 60px); 
+    }
+    
+    .thumbnail {
+        flex: 0 0 auto;      
+        margin: 0 5px;  
+    }
+    
+    /* Ensure the container has proper sizing */
+    .thumbnail-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+}
+
 /* Mobile navigation adjustments */
 @media (max-width: 768px) {
-    .nav-toggle {
-        display: block;
+    .nav-toggle, .close-nav {
+        display: none;
     }
     
     .main-nav {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 250px;
-        height: 100vh;
-        background-color: white;
-        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        transition: right 0.3s ease;
-        padding: 60px 20px 20px;
-    }
-    
-    .main-nav.active {
-        right: 0;
+        position: static;
+        width: auto;
+        height: auto;
+        background-color: transparent;
+        box-shadow: none;
+        padding: 0;
     }
     
     .main-nav ul {
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: flex-end;
     }
     
     .main-nav li {
-        margin: 15px 0;
+        margin-left: 12px;
     }
     
-    .close-nav {
-        display: block;
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: none;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
+    .main-nav a {
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
+    
+    .header-inner {
+        padding: 0 10px;
+    }
+    
+    .logo {
+        font-size: 16px;
     }
 
     .container {
@@ -419,3 +437,32 @@ h1 {
         margin-bottom: 10px;
     }
 }
+
+
+@media (max-width: 650px) {
+    .thumbnail-scroll {
+        padding-left: 0;
+        margin-left: 0;
+    }
+    
+    .thumbnail:first-child {
+        margin-left: 1rem;
+    }
+    
+    .thumbnail-container {
+        justify-content: flex-start;
+        padding-left: 0;
+    }
+}
+
+/* @media (max-width: 430px) {  
+    .thumbnail:first-child {
+        margin-left: 13rem;
+    }
+}
+
+@media (max-width: 390px) {  
+    .thumbnail:first-child {
+        margin-left: 17rem;
+    }
+} */

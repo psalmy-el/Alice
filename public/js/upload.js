@@ -5,6 +5,42 @@ const uploadForm = document.getElementById('uploadForm');
 const posterImageGroup = document.getElementById('posterImageGroup');
 const posterImageInput = document.getElementById('posterImage');
 const posterPreviewContainer = document.getElementById('posterPreview');
+const removeAllBtn = document.createElement('button');
+
+removeAllBtn.className = 'btn btn-outline-danger mb-3 mt-2';
+removeAllBtn.innerHTML = '<i class="fas fa-trash"></i> Remove All Images';
+removeAllBtn.style.display = 'none';
+removeAllBtn.addEventListener('click', removeAllFiles);
+previewsContainer.after(removeAllBtn);
+
+
+const fileLoadingProgressContainer = document.createElement('div');
+fileLoadingProgressContainer.className = 'progress mt-3 mb-3';
+fileLoadingProgressContainer.style.display = 'none';
+const fileLoadingProgressBar = document.createElement('div');
+fileLoadingProgressBar.className = 'progress-bar bg-info';
+fileLoadingProgressBar.style.width = '0%';
+fileLoadingProgressBar.textContent = '0%';
+fileLoadingProgressBar.setAttribute('role', 'progressbar');
+fileLoadingProgressBar.setAttribute('aria-valuenow', '0');
+fileLoadingProgressBar.setAttribute('aria-valuemin', '0');
+fileLoadingProgressBar.setAttribute('aria-valuemax', '100');
+fileLoadingProgressContainer.appendChild(fileLoadingProgressBar);
+previewsContainer.after(fileLoadingProgressContainer);
+
+// Add popup loading container
+const uploadPopupContainer = document.createElement('div');
+uploadPopupContainer.className = 'upload-popup';
+uploadPopupContainer.style.display = 'none';
+uploadPopupContainer.innerHTML = `
+  <div class="upload-popup-content">
+    <h4>Uploading</h4>
+    <div class="progress mt-3 mb-3">
+      <div class="popup-progress-bar progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
+  </div>
+`;
+document.body.appendChild(uploadPopupContainer);
 
 // Track files 
 let files = [];
@@ -18,7 +54,46 @@ uploadArea.addEventListener('click', () => {
 // Show poster image field only when video is selected
 function updateFormForFileTypes() {
   const hasVideo = files.some(file => file.type.startsWith('video/'));
+  
+  // Show/hide poster image field when video is selected
   posterImageGroup.style.display = hasVideo ? 'block' : 'none';
+  
+  // Show/hide intro video checkbox when video is selected
+  const introCheckboxGroup = document.getElementById('introCheckboxGroup');
+  introCheckboxGroup.style.display = hasVideo ? 'block' : 'none';
+}
+
+const introCheckboxGroup = document.getElementById('is_intro').closest('.mb-3');
+introCheckboxGroup.id = 'introCheckboxGroup';
+introCheckboxGroup.style.display = 'none';
+
+// Add warning message when intro checkbox is checked
+const introCheckbox = document.getElementById('is_intro');
+const warningMessage = document.createElement('div');
+warningMessage.className = 'alert alert-danger mt-2';
+warningMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Warning: This will replace the current intro video.';
+warningMessage.style.display = 'none';
+introCheckboxGroup.appendChild(warningMessage);
+
+introCheckbox.addEventListener('change', function() {
+  warningMessage.style.display = this.checked ? 'block' : 'none';
+});
+
+//setAsPrimary function 
+function setAsPrimary(index) {
+  // Skip if already primary
+  if (index === 0) return;
+  
+  // Move the selected file to the first position
+  const file = files[index];
+  files.splice(index, 1);
+  files.unshift(file);
+  
+  // Regenerate all previews
+  previewsContainer.innerHTML = '';
+  files.forEach((file, i) => {
+    createPreview(file, i);
+  });
 }
 
 
@@ -49,11 +124,36 @@ mediaFilesInput.addEventListener('change', (e) => {
 
  // Process selected files
  function handleFiles(filesList) {
-  // Add new files to existing files array
-  for (let i = 0; i < filesList.length; i++) {
-    if (filesList[i].type.startsWith('image/') || filesList[i].type.startsWith('video/')) {
-      files.push(filesList[i]);
+  let imagesCount = 0;
+  let videoCount = 0;
+  let hasAddedVideo = false;
+  
+  // Count existing files by type
+  files.forEach(file => {
+    if (file.type.startsWith('image/')) {
+      imagesCount++;
+    } else if (file.type.startsWith('video/')) {
+      videoCount++;
     }
+  });
+  
+  // Check new files
+  for (let i = 0; i < filesList.length; i++) {
+    if (filesList[i].type.startsWith('image/')) {
+      files.push(filesList[i]);
+      imagesCount++;
+    } else if (filesList[i].type.startsWith('video/') && videoCount === 0 && !hasAddedVideo) {
+      // Only add one video if there's no video already
+      files.push(filesList[i]);
+      videoCount++;
+      hasAddedVideo = true;
+    }
+  }
+  
+  // Show alert if multiple videos were attempted
+  if (Array.from(filesList).filter(f => f.type.startsWith('video/')).length > 1 || 
+      (hasAddedVideo && videoCount > 1)) {
+    showNotification(false, 'Upload Limit', 'Only one video file is allowed per upload.');
   }
   
   // Clear previews and recreate them
@@ -64,9 +164,60 @@ mediaFilesInput.addEventListener('change', (e) => {
     createPreview(file, index);
   });
 
+  // Show/hide Remove All button based on image count
+  removeAllBtn.style.display = imagesCount > 1 ? 'block' : 'none';
+  
   updateFormForFileTypes();
 }
 
+// Add function to remove all files
+function removeAllFiles() {
+  // Keep only video files
+  files = files.filter(file => file.type.startsWith('video/'));
+  
+  // Regenerate all previews
+  previewsContainer.innerHTML = '';
+  files.forEach((file, i) => {
+    createPreview(file, i);
+  });
+  
+  // Hide the Remove All button
+  removeAllBtn.style.display = 'none';
+}
+
+function removeFile(index) {
+  // Remove the file from the array
+  files.splice(index, 1);
+  
+  // Regenerate all previews
+  previewsContainer.innerHTML = '';
+  files.forEach((file, i) => {
+    createPreview(file, i);
+  });
+  
+  // Update form display based on file types
+  updateFormForFileTypes();
+  
+  // Update Remove All button visibility
+  const imageCount = files.filter(f => f.type.startsWith('image/')).length;
+  removeAllBtn.style.display = imageCount > 1 ? 'block' : 'none';
+}
+
+
+//progress indicator
+const progressContainer = document.createElement('div');
+progressContainer.className = 'progress mt-3 mb-3';
+progressContainer.style.display = 'none';
+const progressBar = document.createElement('div');
+progressBar.className = 'progress-bar';
+progressBar.style.width = '0%';
+progressBar.textContent = '0%';
+progressBar.setAttribute('role', 'progressbar');
+progressBar.setAttribute('aria-valuenow', '0');
+progressBar.setAttribute('aria-valuemin', '0');
+progressBar.setAttribute('aria-valuemax', '100');
+progressContainer.appendChild(progressBar);
+previewsContainer.after(progressContainer);
 
 // Handle poster image selection
 posterImageInput.addEventListener('change', (e) => {
@@ -137,6 +288,14 @@ function createPreview(file, index) {
   previewItem.className = 'preview-item';
   previewItem.dataset.index = index;
   
+  // Show loading progress for video files
+  if (file.type.startsWith('video/')) {
+    fileLoadingProgressContainer.style.display = 'block';
+    fileLoadingProgressBar.style.width = '0%';
+    fileLoadingProgressBar.textContent = '0%';
+    fileLoadingProgressBar.setAttribute('aria-valuenow', '0');
+  }
+  
   reader.onload = function(event) {
     if (file.type.startsWith('image/')) {
       const img = document.createElement('img');
@@ -150,6 +309,9 @@ function createPreview(file, index) {
       source.type = file.type;
       video.appendChild(source);
       previewItem.appendChild(video);
+      
+      // Hide file loading progress
+      fileLoadingProgressContainer.style.display = 'none';
     }
     
     // Add remove button
@@ -176,37 +338,25 @@ function createPreview(file, index) {
     });
     
     previewsContainer.appendChild(previewItem);
+    
+    // Update Remove All button visibility
+    const imageCount = files.filter(f => f.type.startsWith('image/')).length;
+    removeAllBtn.style.display = imageCount > 1 ? 'block' : 'none';
+  };
+  
+  // Add progress event for loading files
+  reader.onprogress = function(e) {
+    if (e.lengthComputable && file.type.startsWith('video/')) {
+      const percentComplete = Math.round((e.loaded / e.total) * 100);
+      fileLoadingProgressBar.style.width = percentComplete + '%';
+      fileLoadingProgressBar.textContent = percentComplete + '%';
+      fileLoadingProgressBar.setAttribute('aria-valuenow', percentComplete);
+    }
   };
   
   reader.readAsDataURL(file);
 }
 
-// Remove a file
-function removeFile(index) {
-  files.splice(index, 1);
-  
-  // Regenerate all previews to keep index alignment
-  previewsContainer.innerHTML = '';
-  files.forEach((file, i) => {
-    createPreview(file, i);
-  });
-}
-
-// Set a file as primary
-function setAsPrimary(index) {
-  // Move the selected file to the front of the array
-  if (index !== 0) {
-    const file = files[index];
-    files.splice(index, 1);
-    files.unshift(file);
-    
-    // Regenerate previews
-    previewsContainer.innerHTML = '';
-    files.forEach((file, i) => {
-      createPreview(file, i);
-    });
-  }
-}
 
 // Show notification
 function showNotification(isSuccess, title, message) {
@@ -231,9 +381,12 @@ function resetForm() {
   uploadForm.reset();
   files = [];
   previewsContainer.innerHTML = '';
+  posterPreviewContainer.innerHTML = '';
+  posterFile = null;
+  posterImageGroup.style.display = 'none';
+  removeAllBtn.style.display = 'none';
 }
 
-  // Handle form submission
   uploadForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -271,31 +424,71 @@ function resetForm() {
       formData.append('posterImage', posterFile);
     }
     
-    // Log the form data entries to help debug
-    for (var pair of formData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
+    // Check if we're uploading a video
+    const hasVideo = files.some(file => file.type.startsWith('video/'));
     
-    // Submit using fetch API
-    fetch('/upload', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Server responded with an error status: ' + response.status);
+    // Show regular progress bar and popup
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    progressBar.textContent = '0%';
+    
+    // Show popup progress
+    uploadPopupContainer.style.display = 'flex';
+    const popupProgressBar = document.querySelector('.popup-progress-bar');
+    popupProgressBar.style.width = '0%';
+    popupProgressBar.textContent = '0%';
+    
+    // Submit using fetch API with progress tracking
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload', true);
+    
+    xhr.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        const percentComplete = Math.round((e.loaded / e.total) * 100);
+        
+        // Update both progress bars
+        progressBar.style.width = percentComplete + '%';
+        progressBar.textContent = percentComplete + '%';
+        progressBar.setAttribute('aria-valuenow', percentComplete);
+        
+        popupProgressBar.style.width = percentComplete + '%';
+        popupProgressBar.textContent = percentComplete + '%';
+        popupProgressBar.setAttribute('aria-valuenow', percentComplete);
       }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        showNotification(true, 'Success', 'Your media has been uploaded successfully!');
+    };
+    
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (data.success) {
+            showNotification(true, 'Success', 'Your media has been uploaded successfully!');
+          } else {
+            showNotification(false, 'Error', data.message || 'Upload failed. Please try again.');
+          }
+        } catch (error) {
+          showNotification(false, 'Error', 'Error processing server response.');
+        }
+        
+        // Hide progress bars and popup
+        progressContainer.style.display = 'none';
+        uploadPopupContainer.style.display = 'none';
       } else {
-        showNotification(false, 'Error', data.message || 'Upload failed. Please try again.');
+        showNotification(false, 'Error', 'Server responded with an error status: ' + xhr.status);
+        progressContainer.style.display = 'none';
+        uploadPopupContainer.style.display = 'none';
       }
-    })
-    .catch(error => {
-      console.error('Upload error:', error);
-      showNotification(false, 'Error', 'Error uploading file: ' + error.message);
-    });
+    };
+    
+    xhr.onerror = function() {
+      console.error('Upload error:', xhr.statusText);
+      showNotification(false, 'Error', 'Error uploading file: ' + xhr.statusText);
+      progressContainer.style.display = 'none';
+      uploadPopupContainer.style.display = 'none';
+    };
+    
+    xhr.send(formData);
   });
+  
+
+  

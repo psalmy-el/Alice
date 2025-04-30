@@ -3,24 +3,39 @@ const navToggle = document.querySelector('.nav-toggle');
 const closeNav = document.querySelector('.close-nav');
 const mainNav = document.querySelector('.main-nav');
 
+function isMobileView() {
+    return window.innerWidth <= 768; // Uses the same breakpoint as your CSS
+}
+
 // Function to close the navigation menu properly
 function closeNavMenu() {
-    mainNav.classList.remove('active');
-    document.body.style.overflow = ''; // Restore scrolling
-    navToggle.style.display = 'block'; // Show the toggle button again
-    closeNav.style.display = 'none'; // Hide the close button
+    // Only activate mobile menu behavior in mobile view
+    if (isMobileView()) {
+        mainNav.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
+        navToggle.style.display = 'block'; // Show the toggle button again
+        closeNav.style.display = 'none'; // Hide the close button
+    }
 }
 
 // Open menu
-navToggle.addEventListener('click', function() {
-    mainNav.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
-    closeNav.style.display = 'block'; // Show the close button
-    this.style.display = 'none'; // Hide the toggle button when menu is open
+navToggle.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only activate mobile menu in mobile view
+    if (isMobileView()) {
+        mainNav.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        closeNav.style.display = 'block'; // Show the close button
+        this.style.display = 'none'; // Hide the toggle button when menu is open
+    }
 });
 
 // Close menu button
-closeNav.addEventListener('click', function() {
+closeNav.addEventListener('click', function(e) {
+    e.preventDefault(); 
+    e.stopPropagation();
     closeNavMenu();
 });
 
@@ -29,12 +44,47 @@ const navLinks = document.querySelectorAll('.main-nav a:not(.dropdown-toggle)');
 navLinks.forEach(link => {
     link.addEventListener('click', function(e) {
         // Don't close menu if it's a dropdown toggle
-        if (!this.classList.contains('dropdown-toggle')) {
+        if (!this.classList.contains('dropdown-toggle') && isMobileView()) {
             closeNavMenu();
         }
     });
 });
 
+// Dropdown toggle functionality - moved to DOMContentLoaded event
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    
+    if (dropdownToggle && dropdownMenu) {
+        // Initially hide dropdown menu
+        dropdownMenu.style.display = 'none';
+        
+        dropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Handle dropdown differently based on mobile vs desktop
+            if (isMobileView()) {
+                // Mobile behavior
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            } else {
+                // Desktop behavior - just toggle the dropdown menu
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                // Ensure mobile nav doesn't trigger on desktop
+                mainNav.classList.remove('active');
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+    }
+    
+    // Rest of your DOMContentLoaded code...
+});
 
 // Handle video grid and modal
 document.addEventListener('DOMContentLoaded', function() {
@@ -243,8 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const categoryLinks = document.querySelectorAll('.dropdown-menu a');
     const gridItems = document.querySelectorAll('.grid-item');
     const videoGridSection = document.querySelector('.video-grid-section');
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
     let msnry; // Masonry instance variable
     
     // Function to initialize masonry
@@ -274,67 +322,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     initMasonry();
-
-   // Dropdown toggle functionality
-   dropdownMenu.style.display = 'none';
-    
-   dropdownToggle.addEventListener('click', function(e) {
-       e.preventDefault();
-       dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-   });
    
-   // Close dropdown when clicking outside
-   document.addEventListener('click', function(e) {
-       if (!e.target.closest('.dropdown')) {
-           dropdownMenu.style.display = 'none';
-       }
-   });
-   
-   categoryLinks.forEach(link => {
-       link.addEventListener('click', function(e) {
-           e.preventDefault();
-           
-           // Close the dropdown menu immediately
-           dropdownMenu.style.display = 'none';
-           
-           // Remove active class from all links
-           categoryLinks.forEach(item => item.classList.remove('active'));
-           
-           // Add active class to clicked link
-           this.classList.add('active');
-           
-           // Get selected category
-           const selectedCategory = this.getAttribute('data-category');
-                
-                // Apply filtering logic (simplified, adapt to your existing code)
-                const gridItems = document.querySelectorAll('.grid-item');
-                gridItems.forEach(item => {
-                    const itemCategory = item.getAttribute('data-category');
-                    
-                    if (selectedCategory === 'all' || selectedCategory === itemCategory) {
-                        item.classList.remove('hidden-item');
-                        item.style.display = '';
-                    } else {
-                        item.classList.add('hidden-item');
-                        item.style.display = 'none';
-                    }
-                });
-                
-                // Close the dropdown menu
-                dropdownMenu.style.display = 'none';
-            
-            // Important: Close the navigation menu properly
-            closeNavMenu();
-            });
-        });
-   
-    
     categoryLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
             // Close the dropdown menu immediately
-            dropdownMenu.style.display = 'none';
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            if (dropdownMenu) {
+                dropdownMenu.style.display = 'none';
+            }
             
             // Remove active class from all links
             categoryLinks.forEach(item => item.classList.remove('active'));
@@ -387,6 +384,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 200);
                 }, 150);
             }, 100);
+            
+            // Only close the mobile navigation if in mobile view
+            if (isMobileView()) {
+                closeNavMenu();
+            }
         });
     });
     
@@ -398,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Make sure to close the navigation menu properly on mobile
-    if (window.innerWidth <= 768) {
+    if (isMobileView()) {
         closeNavMenu();
     }
 });
@@ -469,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
         aboutModal.classList.add('show');
         
         // Make sure we close the navigation menu properly when opening the modal
-        if (window.innerWidth <= 768) {
+        if (isMobileView()) {
             closeNavMenu();
         }
     }
@@ -503,6 +505,15 @@ document.addEventListener('DOMContentLoaded', function() {
     aboutLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
+            // Handle differently based on mobile vs desktop
+            if (isMobileView()) {
+                // On mobile, close the mobile nav when opening About modal
+                closeNavMenu();
+            }
+            
+            // Always open the modal
             openModal();
         });
     });

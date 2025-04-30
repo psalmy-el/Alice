@@ -32,3 +32,125 @@
   a:hover{
     color: blue;
   }
+@media (max-width: 994px){
+  /* Hide the navbar toggler */
+  .navbar-toggler {
+    display: none;
+  }
+  
+  /* Keep the navbar menu visible */
+  .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+  }
+  
+  /* Adjust navbar for small screens */
+  .navbar-nav {
+    flex-direction: row;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0.8rem;
+    font-size: 1.2;
+  }
+
+  .navbar-brand img {
+    height: 35px;
+  }
+  
+}  
+
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .lead {
+    font-size: 1rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+  
+  h5 {
+    font-size: 1.1rem;
+  }
+  
+  p {
+    font-size: 0.9rem;
+  }
+  
+  .fa-2x {
+    font-size: 1.5em;
+  }
+  
+  /* Hide the navbar toggler */
+  .navbar-toggler {
+    display: none;
+  }
+  
+  /* Keep the navbar menu visible */
+  .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+  }
+  
+  /* Adjust navbar for small screens */
+  .navbar-nav {
+    flex-direction: row;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Contact information section adjustments */
+  .contact-info {
+    padding: 1rem !important;
+  }
+  
+  .contact-icon .fas {
+    margin-top: 0.2rem;
+  }
+  
+  .social-links a {
+    margin-right: 0.8rem !important;
+  }
+  
+  /* Additional spacing adjustments */
+  .py-5 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+  
+  .me-3 {
+    margin-right: 0.75rem !important;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .navbar-brand img {
+    height: 30px;
+  }
+  
+  .display-4 {
+    font-size: 1.8rem;
+  }
+  
+  .contact-icon .fas {
+    font-size: 1.2em;
+  }
+}
