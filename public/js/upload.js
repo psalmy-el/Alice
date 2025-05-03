@@ -186,21 +186,48 @@ function removeAllFiles() {
 }
 
 function removeFile(index) {
-  // Remove the file from the array
-  files.splice(index, 1);
+  // Get the preview item that needs to be removed
+  const previewItem = document.querySelector(`.preview-item[data-index="${index}"]`);
   
-  // Regenerate all previews
-  previewsContainer.innerHTML = '';
-  files.forEach((file, i) => {
-    createPreview(file, i);
-  });
-  
-  // Update form display based on file types
-  updateFormForFileTypes();
-  
-  // Update Remove All button visibility
-  const imageCount = files.filter(f => f.type.startsWith('image/')).length;
-  removeAllBtn.style.display = imageCount > 1 ? 'block' : 'none';
+  if (previewItem) {
+    // Remove the element from the DOM directly
+    previewItem.remove();
+    
+    // Remove the file from the array
+    files.splice(index, 1);
+    
+    // Update the data-index attributes of all remaining preview items
+    const remainingPreviews = document.querySelectorAll('.preview-item');
+    remainingPreviews.forEach((item, i) => {
+      item.dataset.index = i;
+      
+      // Clear any existing primary badges
+      const existingBadge = item.querySelector('.primary-badge');
+      if (existingBadge) {
+        existingBadge.remove();
+      }
+      
+      // Add primary badge to the first item
+      if (i === 0) {
+        const primaryBadge = document.createElement('div');
+        primaryBadge.className = 'primary-badge';
+        primaryBadge.textContent = 'Primary';
+        item.appendChild(primaryBadge);
+      }
+      
+      // Update click event to use the new index
+      item.onclick = () => {
+        setAsPrimary(i);
+      };
+    });
+    
+    // Update form display based on file types
+    updateFormForFileTypes();
+    
+    // Update Remove All button visibility
+    const imageCount = files.filter(f => f.type.startsWith('image/')).length;
+    removeAllBtn.style.display = imageCount > 1 ? 'block' : 'none';
+  }
 }
 
 

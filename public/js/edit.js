@@ -1,3 +1,10 @@
+function closeNotification() {
+  const notificationModal = document.getElementById('notificationModal');
+  if (notificationModal) {
+    notificationModal.style.display = 'none';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const uploadArea = document.getElementById('uploadArea');
   const mediaFilesInput = document.getElementById('mediaFiles');
@@ -374,29 +381,46 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Remove file function
   function removeNewFile(index) {
-    newFiles.splice(index, 1);
-    newFilePreviewsContainer.innerHTML = '';
-    newFiles.forEach((file, i) => {
-      createPreview(file, i);
-    });
+    // Get the preview item that needs to be removed
+    const previewItem = document.querySelector(`.preview-item[data-index="${index}"]`);
     
-    // Update poster image section visibility
-    if (!document.querySelector('video') && !newFiles.some(file => file.type.startsWith('video/'))) {
-      if (posterImageGroup) {
-        posterImageGroup.style.display = 'none';
+    if (previewItem) {
+      // Remove the element from the DOM directly
+      previewItem.remove();
+      
+      // Remove the file from the array
+      newFiles.splice(index, 1);
+      
+      // Update the data-index attributes of all remaining preview items
+      const remainingPreviews = document.querySelectorAll('#newFilePreviews .preview-item');
+      remainingPreviews.forEach((item, i) => {
+        item.dataset.index = i;
+        
+        // Update click event to use the new index
+        const removeBtn = item.querySelector('.remove-preview');
+        if (removeBtn) {
+          // Clear existing event listeners
+          const newRemoveBtn = removeBtn.cloneNode(true);
+          removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+          
+          // Add new event listener with updated index
+          newRemoveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeNewFile(i);
+          });
+        }
+      });
+      
+      // Update poster image section visibility
+      if (!document.querySelector('video') && !newFiles.some(file => file.type.startsWith('video/'))) {
+        if (posterImageGroup) {
+          posterImageGroup.style.display = 'none';
+        }
       }
     }
   }
   
   // Function to show notification
-
-  function closeNotification() {
-    const notificationModal = document.getElementById('notificationModal');
-    if (notificationModal) {
-      notificationModal.style.display = 'none';
-    }
-  }
-  
   function showNotification(isSuccess, title, message) {
     const notificationModal = document.getElementById('notificationModal');
     const successIcon = document.getElementById('successIcon');

@@ -50,291 +50,501 @@ navLinks.forEach(link => {
     });
 });
 
-// Dropdown toggle functionality - moved to DOMContentLoaded event
+// Animation section
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-    
-    if (dropdownToggle && dropdownMenu) {
-        // Initially hide dropdown menu
-        dropdownMenu.style.display = 'none';
-        
-        dropdownToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Handle dropdown differently based on mobile vs desktop
-            if (isMobileView()) {
-                // Mobile behavior
-                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-            } else {
-                // Desktop behavior - just toggle the dropdown menu
-                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-                // Ensure mobile nav doesn't trigger on desktop
-                mainNav.classList.remove('active');
-            }
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown')) {
-                dropdownMenu.style.display = 'none';
-            }
-        });
-    }
-    
-    // Rest of your DOMContentLoaded code...
-});
-
-// Handle video grid and modal
-document.addEventListener('DOMContentLoaded', function() {
-    const grid = document.querySelector('.video-grid');
-    const videoGridItems = document.querySelectorAll('.grid-item-inner[data-video-src]'); // Only select video items
-    const videoModal = document.querySelector('.video-modal');
-    const modalVideo = document.querySelector('.modal-video');
-    const closeModal = document.querySelector('.close-modal');
-    
-    
-    // Remove controls from all grid videos but keep them on modal video
-    document.querySelectorAll('.grid-item video').forEach(video => {
-        // Remove controls from grid videos
-        video.removeAttribute('controls');
-        
-        // Ensure poster image is set properly
-        if (video.hasAttribute('poster')) {
-            const posterUrl = video.getAttribute('poster');
-            video.style.background = `url(${posterUrl}) no-repeat center center`;
-            video.style.backgroundSize = 'cover';
-            video.setAttribute('data-poster', posterUrl);
-        }
-        
-        // Reset video when it ends
-        video.addEventListener('ended', function() {
-            this.currentTime = 0;
-            this.pause();
-            this.load(); // This ensures poster shows up again
-        });
-    });
-    
-    // Make sure modal video has controls
-    if (modalVideo) {
-        modalVideo.setAttribute('controls', '');
-    }
-
-    // Better video loading optimization
-    const optimizeVideoLoading = () => {
-        const gridVideos = document.querySelectorAll('.grid-item video');
-        
-        gridVideos.forEach(video => {
-            // Set to metadata preload mode to improve initial loading speed
-            video.setAttribute('preload', 'metadata');
-            
-            // Create and use IntersectionObserver to detect when videos are visible
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // When video is in view, set to auto preload
-                        video.setAttribute('preload', 'auto');
-                        observer.unobserve(video);
-                    }
-                });
-            }, {
-                rootMargin: '200px 0px',
-                threshold: 0.01
-            });
-            
-            observer.observe(video);
-        });
-        
-        // Special handling for intro video
-        const introVideo = document.querySelector('.intro-background-video');
-        if (introVideo) {
-            introVideo.setAttribute('preload', 'auto');
-            introVideo.load();
-            introVideo.play().catch(error => {
-                console.log('Intro video autoplay prevented:', error);
-            });
-        }
-    };
-    
-    // Run optimization
-    optimizeVideoLoading();
-
-    // Initialize masonry layout after images are loaded
-    if (typeof Masonry !== 'undefined' && typeof imagesLoaded !== 'undefined') {
-        imagesLoaded(grid, function() {
-            new Masonry(grid, {
-                itemSelector: '.grid-item',
-                columnWidth: '.grid-item',
-                percentPosition: true,
-                gutter: 15
-            });
-        });
-    }
-
-   // Handle clicks on the grid items - ONLY FOR VIDEO ITEMS
-   videoGridItems.forEach(item => {
-    const video = item.querySelector('video');
-    
-    // Only apply video-specific behavior to items that have videos
-    if (video) {
-        // Video-specific event listeners
-        video.muted = true;
-        
-        // Video hover behaviors
-        item.addEventListener('mouseenter', function() {
-            const playButton = this.querySelector('.play-button');
-            if (playButton) {
-                playButton.style.opacity = '0';
-                playButton.style.visibility = 'hidden';
-            }
-            
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log('Autoplay was prevented:', error);
-                    if (playButton) {
-                        playButton.style.opacity = '0.8';
-                        playButton.style.visibility = 'visible';
-                    }
-                });
-            }
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            if (video) {
-                video.pause();
-                video.currentTime = 0;
-                
-                if (video.hasAttribute('poster')) {
-                    video.load();
-                }
-                
-                const playButton = this.querySelector('.play-button');
-                if (playButton) {
-                    playButton.style.opacity = '0.8';
-                    playButton.style.visibility = 'visible';
-                }
-            }
-        });
-        
-        // Video click behavior - open modal
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            let videoSrc;
-            if (this.hasAttribute('data-video-src')) {
-                videoSrc = this.getAttribute('data-video-src');
-            } else if (video && video.querySelector('source')) {
-                videoSrc = video.querySelector('source').getAttribute('src');
-            }
-            
-            if (videoSrc) {
-                if (video) {
-                    video.pause();
-                    video.currentTime = 0;
-                }
-                
-                const modalSource = modalVideo.querySelector('source');
-                modalSource.setAttribute('src', videoSrc);
-                
-                modalVideo.load();
-                videoModal.style.display = 'flex';
-                
-                modalVideo.muted = false;
-                modalVideo.play().catch(error => {
-                    console.log('Modal video play was prevented:', error);
-                    modalVideo.muted = true;
-                    modalVideo.play().catch(e => {
-                        console.log('Even muted autoplay failed:', e);
-                    });
-                });
-            }
-        });
-        
-        // Prevent default video click behavior
-        video.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const clickEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            });
-            item.dispatchEvent(clickEvent);
-        });
-    }
-   });
-
-    // Close modal handlers
-    closeModal.addEventListener('click', function() {
-        modalVideo.pause();
-        videoModal.style.display = 'none';
-    });
-
-    videoModal.addEventListener('click', function(e) {
-        if (e.target === videoModal) {
-            modalVideo.pause();
-            videoModal.style.display = 'none';
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && videoModal.style.display === 'flex') {
-            modalVideo.pause();
-            videoModal.style.display = 'none';
-        }
-    });
-});
-
-// Grid filtering based on categories
-document.addEventListener('DOMContentLoaded', function() {
-    const categoryLinks = document.querySelectorAll('.dropdown-menu a');
+    // Initialize variables
+    const videoGrid = document.querySelector('.video-grid');
     const gridItems = document.querySelectorAll('.grid-item');
-    const videoGridSection = document.querySelector('.video-grid-section');
-    let msnry; // Masonry instance variable
+    const categoryLinks = document.querySelectorAll('[data-category]');
+    let currentCategory = 'all';
     
-    // Function to initialize masonry
-    function initMasonry() {
-        const grid = document.querySelector('.video-grid');
-        
-        // First destroy existing instance if it exists
-        if (msnry) {
-            msnry.destroy();
-            msnry = null;
-        }
-        
-        // Then create new instance
-        if (typeof Masonry !== 'undefined' && typeof imagesLoaded !== 'undefined') {
-            // Use imagesLoaded to ensure all images are loaded first
-            imagesLoaded(grid, function() {
-                msnry = new Masonry(grid, {
-                    itemSelector: '.grid-item:not(.hidden-item)',
-                    columnWidth: '.grid-item:not(.hidden-item)',
-                    percentPosition: true,
-                    gutter: 15,
-                    transitionDuration: '0.4s' // Add transition for smoother updates
-                });
-            });
-        }
-    }
+    // Initial setup variables
+    let msnry;
+    const transitionDuration = 600; // Transition duration in ms
     
-    // Initialize on page load
+    // Configure all videos
+    setupVideos();
+    
+    // Add position tracking index to each item for better position tracking
+    gridItems.forEach((item, index) => {
+        item.setAttribute('data-index', index);
+    });
+    
+    // Initialize masonry with visible tracking
     initMasonry();
-   
+    
+    // Add event listeners for category selection
     categoryLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Close the dropdown menu immediately
-            const dropdownMenu = document.querySelector('.dropdown-menu');
-            if (dropdownMenu) {
-                dropdownMenu.style.display = 'none';
+            // Get selected category
+            const category = this.getAttribute('data-category');
+            if (category === currentCategory) return;
+            
+            // Update active status on links
+            categoryLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update current category
+            currentCategory = category;
+            
+            // Filter with visible sliding animation
+            filterWithSlideAnimation(category);
+            
+            // Scroll to grid section with offset for header
+            const videoGridSection = document.querySelector('.video-grid-section');
+            if (videoGridSection) {
+                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                const sectionPosition = videoGridSection.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = sectionPosition - headerHeight - 20;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Setup hover effects for grid items
+    setupHoverEffects();
+    
+    /**
+     * Initialize Masonry layout
+     */
+    function initMasonry() {
+        if (typeof Masonry !== 'undefined' && typeof imagesLoaded !== 'undefined') {
+            imagesLoaded(videoGrid, function() {
+                // Create new masonry instance
+                msnry = new Masonry(videoGrid, {
+                    itemSelector: '.grid-item:not(.hidden-item)',
+                    columnWidth: '.grid-item:not(.hidden-item)',
+                    percentPosition: true,
+                    gutter: 20,
+                    transitionDuration: 0, // No transition initially
+                    stagger: 0
+                });
+            });
+        }
+    }
+    
+    /**
+     * Filter items with sliding animation ensuring ALL items slide
+     * rather than fade/disappear
+     */
+    function filterWithSlideAnimation(category) {
+        // Prevent interaction during animation
+        videoGrid.classList.add('filtering');
+        
+        // STEP 1: Capture current positions of ALL items (visible and hidden)
+        const currentPositions = {};
+        gridItems.forEach(item => {
+            // Get current display state
+            const wasHidden = item.classList.contains('hidden-item');
+            
+            // Temporarily make all items visible to get their real positions
+            if (wasHidden) {
+                item.classList.remove('hidden-item');
+                item.style.display = '';
+                item.style.opacity = '0'; // Keep invisible but measurable
             }
             
-            // Remove active class from all links
-            categoryLinks.forEach(item => item.classList.remove('active'));
+            // Get current position
+            const rect = item.getBoundingClientRect();
+            const key = item.getAttribute('data-index');
+            currentPositions[key] = {
+                left: rect.left,
+                top: rect.top,
+                wasHidden: wasHidden
+            };
+            
+            // Restore hidden state if needed
+            if (wasHidden) {
+                item.classList.add('hidden-item');
+                item.style.display = 'none';
+            }
+        });
+        
+        // STEP 2: Determine which items should be visible in new category
+        gridItems.forEach(item => {
+            if (category === 'all' || item.getAttribute('data-category') === category) {
+                // This item will be visible
+                item.classList.remove('hidden-item');
+                item.style.display = '';
+                item.style.opacity = '1';
+            } else {
+                // This item will be hidden after animation
+                item.classList.add('will-hide');
+                // But keep it visible during calculation
+                item.classList.remove('hidden-item');
+                item.style.display = '';
+                item.style.opacity = '1';
+            }
+        });
+        
+        // Disable transitions for initial positioning
+        videoGrid.classList.add('no-transition');
+        
+        // Force reflow
+        void videoGrid.offsetWidth;
+        
+        // STEP 3: Recalculate layout with Masonry
+        if (msnry) {
+            msnry.options.transitionDuration = 0;
+            msnry.layout();
+        }
+        
+        // Force reflow
+        void videoGrid.offsetWidth;
+        
+        // STEP 4: Capture new positions
+        const newPositions = {};
+        gridItems.forEach(item => {
+            const rect = item.getBoundingClientRect();
+            const key = item.getAttribute('data-index');
+            newPositions[key] = {
+                left: rect.left,
+                top: rect.top
+            };
+        });
+        
+        // STEP 5: Apply FLIP animation technique
+        gridItems.forEach(item => {
+            const key = item.getAttribute('data-index');
+            const currentPos = currentPositions[key];
+            const newPos = newPositions[key];
+            
+            // Apply transform to create illusion items are still in old position
+            if (currentPos && newPos) {
+                const deltaX = currentPos.left - newPos.left;
+                const deltaY = currentPos.top - newPos.top;
+                
+                // If item was previously hidden, position it at its final position
+                // but make it invisible (will fade in during animation)
+                if (currentPos.wasHidden) {
+                    item.style.transform = 'translate(0, 0)';
+                    item.style.opacity = '0';
+                } else {
+                    // Apply transform to offset new position
+                    item.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                    item.style.opacity = '1';
+                }
+                
+                // Items that are moving get higher z-index
+                item.style.zIndex = '2';
+            }
+        });
+        
+        // Force reflow
+        void videoGrid.offsetWidth;
+        
+        // STEP 6: Start animation
+        videoGrid.classList.remove('no-transition');
+        
+        // Animate to final positions
+        gridItems.forEach(item => {
+            const key = item.getAttribute('data-index');
+            const currentPos = currentPositions[key];
+            
+            // Animate all items to their final position with transform
+            item.style.transform = 'translate(0, 0)';
+            
+            // If item was previously hidden, fade it in
+            if (currentPos.wasHidden && !item.classList.contains('will-hide')) {
+                item.style.opacity = '1';
+            }
+            
+            // If item will be hidden, fade it out
+            if (item.classList.contains('will-hide')) {
+                item.style.opacity = '0';
+            }
+        });
+        
+        // STEP 7: Clean up after animation
+        setTimeout(() => {
+            if (msnry) {
+                msnry.options.transitionDuration = '0.4s';
+            }
+            
+            // Hide items that should be hidden
+            gridItems.forEach(item => {
+                if (item.classList.contains('will-hide')) {
+                    item.classList.add('hidden-item');
+                    item.style.display = 'none';
+                    item.classList.remove('will-hide');
+                }
+                
+                // Reset styles
+                item.style.transform = '';
+                item.style.zIndex = '';
+            });
+            
+            // Update layout one final time
+            if (msnry) {
+                msnry.layout();
+            }
+            
+            // Re-enable interaction
+            videoGrid.classList.remove('filtering');
+        }, transitionDuration);
+    }
+    
+    // Configure all videos
+    function setupVideos() {
+        const videos = document.querySelectorAll('.grid-item video');
+        
+        videos.forEach(video => {
+            // Remove controls for grid view
+            video.controls = false;
+            
+            // Performance optimizations
+            video.preload = "metadata";
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            
+            // Lazy loading - only start playing when in viewport
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        video.play().catch(e => {
+                            console.log('Video play error:', e);
+                        });
+                    } else {
+                        video.pause();
+                    }
+                });
+            }, {
+                rootMargin: '50px',
+                threshold: 0.1
+            });
+            
+            observer.observe(video);
+        });
+    }
+    
+    /**
+     * Setup hover effects for grid items
+     */
+    function setupHoverEffects() {
+        gridItems.forEach(item => {
+            const gridInner = item.querySelector('.grid-item-inner');
+            const overlay = item.querySelector('.grid-item-overlay');
+            const media = item.querySelector('img, video');
+            
+            if (gridInner && overlay) {
+                overlay.classList.add('bottom-title');
+                
+                gridInner.addEventListener('mouseenter', function() {
+                    overlay.style.transform = 'translateY(0)';
+                    if (media) {
+                        media.style.transform = 'scale(1.03)';
+                    }
+                });
+                
+                gridInner.addEventListener('mouseleave', function() {
+                    overlay.style.transform = 'translateY(100%)';
+                    if (media) {
+                        media.style.transform = 'scale(1)';
+                    }
+                });
+            }
+        });
+    }
+    
+    // Enhanced Modal functionality
+    const videoModal = document.querySelector('.video-modal');
+    const modalContent = videoModal?.querySelector('.modal-content');
+    const modalVideo = document.querySelector('.modal-video');
+    const closeModal = document.querySelector('.close-modal');
+    
+    // Add click event to all video grid items
+    document.querySelectorAll('.grid-item-inner[data-video-src]').forEach(item => {
+        item.addEventListener('click', function() {
+            const videoSrc = this.getAttribute('data-video-src');
+            
+            if (videoSrc && modalVideo) {
+                // Set the video source
+                const videoSource = modalVideo.querySelector('source') || document.createElement('source');
+                videoSource.setAttribute('src', videoSrc);
+                videoSource.setAttribute('type', 'video/mp4');
+                
+                if (!modalVideo.querySelector('source')) {
+                    modalVideo.appendChild(videoSource);
+                }
+                
+                modalVideo.load();
+                
+                // Show modal
+                videoModal.style.display = 'flex';
+                
+                // Force reflow for smooth animation
+                void videoModal.offsetWidth;
+                
+                // Fade in effect
+                videoModal.style.opacity = '1';
+                videoModal.classList.add('active');
+                
+                if (modalContent) {
+                    modalContent.style.transform = 'translateY(0)';
+                }
+                
+                // Play the video after modal animation
+                setTimeout(() => {
+                    modalVideo.play().catch(e => {
+                        console.log('Modal video play error:', e);
+                    });
+                }, 300);
+            }
+        });
+    });
+    
+    // Close modal functions
+    if (closeModal) {
+        closeModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeVideoModal();
+        });
+    }
+    
+    if (videoModal) {
+        videoModal.addEventListener('click', function(e) {
+            if (e.target === videoModal) {
+                closeVideoModal();
+            }
+        });
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && videoModal && videoModal.style.opacity === '1') {
+            closeVideoModal();
+        }
+    });
+    
+    function closeVideoModal() {
+        if (!videoModal) return;
+        
+        if (modalVideo) {
+            modalVideo.pause();
+        }
+        
+        videoModal.style.opacity = '0';
+        videoModal.classList.remove('active');
+        
+        if (modalContent) {
+            modalContent.style.transform = 'translateY(20px)';
+        }
+        
+        setTimeout(() => {
+            videoModal.style.display = 'none';
+        }, 500);
+    }
+    
+    // Add required CSS
+    addRequiredCSS();
+    
+    function addRequiredCSS() {
+        if (!document.querySelector('#smooth-slide-styles')) {
+            const style = document.createElement('style');
+            style.id = 'smooth-slide-styles';
+            style.textContent = `
+                /* Smooth sliding styles */
+                .grid-item {
+                    transform: translate(0, 0);
+                    transition: transform ${transitionDuration/1000}s cubic-bezier(0.25, 0.1, 0.25, 1), 
+                                opacity ${transitionDuration/1000}s cubic-bezier(0.25, 0.1, 0.25, 1);
+                    will-change: transform, opacity;
+                }
+                
+                .video-grid.no-transition * {
+                    transition: none !important;
+                }
+                
+                .video-grid.filtering {
+                    pointer-events: none;
+                }
+                
+                /* Modal transitions */
+                .video-modal {
+                    opacity: 0;
+                    transition: opacity 0.5s ease;
+                }
+                
+                .video-modal .modal-content {
+                    transform: translateY(20px);
+                    transition: transform 0.5s ease;
+                }
+                
+                .video-modal.active .modal-content {
+                    transform: translateY(0);
+                }
+                
+                /* FLIP Animation Support */
+                .grid-item.moving {
+                    z-index: 2;
+                }
+                
+                /* Additional helper class */
+                .will-hide {
+                    /* Used for items that will be hidden after animation */
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    // Set initial active state for "All" category
+    const allCategoryLink = document.querySelector('[data-category="all"]');
+    if (allCategoryLink) {
+        allCategoryLink.classList.add('active');
+    }
+});
+
+// vertical category section
+document.addEventListener('DOMContentLoaded', function() {
+    // Create vertical categories list container - for desktop only
+    const verticalCategoriesContainer = document.createElement('div');
+    verticalCategoriesContainer.className = 'vertical-categories-container';
+    document.body.appendChild(verticalCategoriesContainer);
+    
+    // Create vertical categories list
+    const verticalCategoriesList = document.createElement('ul');
+    verticalCategoriesList.className = 'vertical-categories-list';
+    
+    // Get original categories
+    const originalItems = document.querySelectorAll('.dropdown-menu:not(.vertical) li');
+    
+    // If no original items found, we can get them from the vertical menu if it exists
+    if (originalItems.length === 0) {
+        const verticalMenuItems = document.querySelectorAll('.dropdown-menu.vertical li');
+        verticalMenuItems.forEach(item => {
+            const clone = item.cloneNode(true);
+            verticalCategoriesList.appendChild(clone);
+        });
+    } else {
+        // Clone original dropdown items to the vertical list
+        originalItems.forEach(item => {
+            const clone = item.cloneNode(true);
+            verticalCategoriesList.appendChild(clone);
+        });
+    }
+    
+    // Add the vertical list to the container
+    verticalCategoriesContainer.appendChild(verticalCategoriesList);
+    
+    // Get all category links in the vertical list
+    const verticalCategoryLinks = verticalCategoriesList.querySelectorAll('a[data-category]');
+    
+    // Add category filtering functionality to vertical list items
+    verticalCategoryLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all category links
+            document.querySelectorAll('.vertical-categories-list a').forEach(item => 
+                item.classList.remove('active'));
             
             // Add active class to clicked link
             this.classList.add('active');
@@ -342,70 +552,256 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get selected category
             const selectedCategory = this.getAttribute('data-category');
             
-            // First, temporarily hide the entire grid to prevent flickering
-            const grid = document.querySelector('.video-grid');
-            grid.style.visibility = 'hidden';
-            
-            // Filter grid items
-            gridItems.forEach(item => {
-                const itemCategory = item.getAttribute('data-category');
-                
-                if (selectedCategory === 'all' || selectedCategory === itemCategory) {
-                    item.classList.remove('hidden-item');
-                    item.style.display = '';
+            // Find the main DOM document-level category handler to reuse its methods
+            const mainCategoryHandler = document.querySelector('[data-category="' + selectedCategory + '"]:not(.vertical-categories-list a)');
+            if (mainCategoryHandler) {
+                // Trigger a click on the main category handler to reuse its event handler
+                mainCategoryHandler.click();
+            } else {
+                // As a fallback, manually apply animation effect
+                if (typeof applyAnimationEffect === 'function') {
+                    applyAnimationEffect(selectedCategory);
                 } else {
-                    item.classList.add('hidden-item');
-                    item.style.display = 'none';
-                }
-            });
-            
-            // Scroll to the video grid section first
-            videoGridSection.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-            
-            // Use a proper sequence of events with appropriate timing
-            setTimeout(function() {
-                // Destroy the existing masonry instance
-                if (msnry) {
-                    msnry.destroy();
-                    msnry = null;
-                }
-                
-                // Give some time for the DOM to update
-                setTimeout(function() {
-                    // Now reinitialize masonry
-                    initMasonry();
+                    // Access the function through the global scope as defined in the DOMContentLoaded event
+                    const videoGrid = document.querySelector('.video-grid');
+                    const gridItems = document.querySelectorAll('.grid-item');
                     
-                    // Show the grid again after masonry is initialized
-                    setTimeout(function() {
-                        grid.style.visibility = 'visible';
-                    }, 200);
-                }, 150);
-            }, 100);
+                    if (videoGrid) {
+                        // Similar to the applyAnimationEffect function but simplified
+                        videoGrid.classList.add('recalculating');
+                        videoGrid.classList.add('animation-fade');
+                        videoGrid.classList.add('animation-active');
+                        
+                        setTimeout(() => {
+                            // Filter grid items
+                            gridItems.forEach(item => {
+                                if (selectedCategory === 'all' || item.getAttribute('data-category') === selectedCategory) {
+                                    item.classList.remove('hidden-item');
+                                    item.style.display = '';
+                                } else {
+                                    item.classList.add('hidden-item');
+                                    item.style.display = 'none';
+                                }
+                            });
+                            
+                            // Reinitialize masonry if available
+                            if (typeof Masonry !== 'undefined' && typeof imagesLoaded !== 'undefined') {
+                                if (window.msnry) {
+                                    window.msnry.destroy();
+                                }
+                                
+                                imagesLoaded(videoGrid, function() {
+                                    window.msnry = new Masonry(videoGrid, {
+                                        itemSelector: '.grid-item:not(.hidden-item)',
+                                        columnWidth: '.grid-item:not(.hidden-item)',
+                                        percentPosition: true,
+                                        gutter: 15,
+                                        transitionDuration: '0.4s'
+                                    });
+                                });
+                            }
+                            
+                            // Remove animation classes after some time
+                            setTimeout(() => {
+                                videoGrid.classList.remove('animation-active', 'recalculating');
+                            }, 600);
+                        }, 300);
+                    }
+                }
+            }
             
-            // Only close the mobile navigation if in mobile view
-            if (isMobileView()) {
-                closeNavMenu();
+            // Get reference to the video grid section
+            const videoGridSection = document.querySelector('.video-grid-section');
+            
+            // Scroll to the video grid section if it exists
+            if (videoGridSection) {
+                videoGridSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
             }
         });
     });
     
-    // Additional fix: Re-layout masonry on window resize
-    window.addEventListener('resize', function() {
-        if (msnry) {
-            msnry.layout();
+    // Create Mobile Categories Menu
+    const createMobileCategoriesMenu = function() {
+        // Only create if we're in mobile view
+        if (isMobileView()) {
+            // Check if mobile categories menu already exists
+            if (!document.querySelector('.mobile-categories-menu')) {
+                // Create container
+                const mobileCategoriesMenu = document.createElement('div');
+                mobileCategoriesMenu.className = 'mobile-categories-menu';
+                
+                // Create dropdown toggle
+                const dropdownToggle = document.createElement('button');
+                dropdownToggle.className = 'dropdown-toggle';
+                dropdownToggle.textContent = 'Categories';
+                dropdownToggle.setAttribute('data-bs-toggle', 'dropdown');
+                dropdownToggle.setAttribute('aria-expanded', 'false');
+                
+                // Create dropdown menu
+                const dropdownMenu = document.createElement('ul');
+                dropdownMenu.className = 'dropdown-menu';
+                dropdownMenu.style.display = 'none'; // Initially hidden
+                
+                // Get categories from vertical list
+                const verticalCategoryLinks = document.querySelectorAll('.vertical-categories-list a[data-category]');
+                
+                // Add "All" category first if it doesn't exist
+                const allItem = document.createElement('li');
+                const allLink = document.createElement('a');
+                allLink.href = '#';
+                allLink.textContent = 'All Categories';
+                allLink.setAttribute('data-category', 'all');
+                allItem.appendChild(allLink);
+                dropdownMenu.appendChild(allItem);
+                
+                // Clone other categories
+                verticalCategoryLinks.forEach(link => {
+                    if (link.getAttribute('data-category') !== 'all') {
+                        const li = document.createElement('li');
+                        const a = document.createElement('a');
+                        a.href = '#';
+                        a.textContent = link.textContent;
+                        a.setAttribute('data-category', link.getAttribute('data-category'));
+                        li.appendChild(a);
+                        dropdownMenu.appendChild(li);
+                    }
+                });
+                
+                // Add event listeners to category links
+                const categoryLinks = dropdownMenu.querySelectorAll('a[data-category]');
+                categoryLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Remove active class from all links
+                        categoryLinks.forEach(item => item.classList.remove('active'));
+                        
+                        // Add active class to clicked link
+                        this.classList.add('active');
+                        
+                        // Get selected category
+                        const selectedCategory = this.getAttribute('data-category');
+                        
+                        // Find the main DOM document-level category handler to reuse its methods
+                        const mainCategoryHandler = document.querySelector('[data-category="' + selectedCategory + '"]:not(.mobile-categories-menu a)');
+                        if (mainCategoryHandler) {
+                            // Trigger a click on the main category handler to reuse its event handler
+                            mainCategoryHandler.click();
+                        } else {
+                            // As a fallback, manually apply animation effect through the global scope
+                            const videoGrid = document.querySelector('.video-grid');
+                            const gridItems = document.querySelectorAll('.grid-item');
+                            
+                            if (videoGrid) {
+                                // Similar to the applyAnimationEffect function but simplified
+                                videoGrid.classList.add('recalculating');
+                                videoGrid.classList.add('animation-fade');
+                                videoGrid.classList.add('animation-active');
+                                
+                                setTimeout(() => {
+                                    // Filter grid items
+                                    gridItems.forEach(item => {
+                                        if (selectedCategory === 'all' || item.getAttribute('data-category') === selectedCategory) {
+                                            item.classList.remove('hidden-item');
+                                            item.style.display = '';
+                                        } else {
+                                            item.classList.add('hidden-item');
+                                            item.style.display = 'none';
+                                        }
+                                    });
+                                    
+                                    // Reinitialize masonry if available
+                                    if (typeof Masonry !== 'undefined' && typeof imagesLoaded !== 'undefined') {
+                                        if (window.msnry) {
+                                            window.msnry.destroy();
+                                        }
+                                        
+                                        imagesLoaded(videoGrid, function() {
+                                            window.msnry = new Masonry(videoGrid, {
+                                                itemSelector: '.grid-item:not(.hidden-item)',
+                                                columnWidth: '.grid-item:not(.hidden-item)',
+                                                percentPosition: true,
+                                                gutter: 15,
+                                                transitionDuration: '0.4s'
+                                            });
+                                        });
+                                    }
+                                    
+                                    // Remove animation classes after some time
+                                    setTimeout(() => {
+                                        videoGrid.classList.remove('animation-active', 'recalculating');
+                                    }, 600);
+                                }, 300);
+                            }
+                        }
+                        
+                        // Close dropdown and nav menu
+                        dropdownMenu.style.display = 'none';
+                        dropdownToggle.setAttribute('aria-expanded', 'false');
+                        closeNavMenu();
+                    });
+                });
+                
+                // Append elements
+                mobileCategoriesMenu.appendChild(dropdownToggle);
+                mobileCategoriesMenu.appendChild(dropdownMenu);
+                
+                // Add to main navigation
+                const mainNav = document.querySelector('.main-nav ul');
+                if (mainNav) {
+                    const menuItem = document.createElement('li');
+                    menuItem.className = 'mobile-only';
+                    menuItem.appendChild(mobileCategoriesMenu);
+                    mainNav.appendChild(menuItem);
+                    
+                    // Toggle dropdown functionality
+                    dropdownToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const expanded = this.getAttribute('aria-expanded') === 'true';
+                        this.setAttribute('aria-expanded', !expanded);
+                        
+                        if (expanded) {
+                            dropdownMenu.style.display = 'none';
+                        } else {
+                            dropdownMenu.style.display = 'block';
+                        }
+                    });
+                }
+            }
         }
+    };
+    
+    // Call function on load
+    createMobileCategoriesMenu();
+    
+    // Update on resize
+    window.addEventListener('resize', function() {
+        createMobileCategoriesMenu();
     });
-
-    // Make sure to close the navigation menu properly on mobile
-    if (isMobileView()) {
-        closeNavMenu();
+    
+    // Hide any existing dropdown menus that aren't supposed to be shown
+    const originalDropdown = document.querySelector('.dropdown.mobile-only');
+    if (originalDropdown) {
+        originalDropdown.style.display = 'none';
+    }
+    
+    const verticalToggle = document.querySelector('.dropdown-toggle.vertical-toggle');
+    if (verticalToggle) {
+        verticalToggle.style.display = 'none';
+    }
+    
+    const verticalMenu = document.querySelector('.dropdown-menu.vertical');
+    if (verticalMenu) {
+        verticalMenu.style.display = 'none';
     }
 });
 
-//cursor change 
+// cursor change 
 document.addEventListener('DOMContentLoaded', function() {
     // Create a custom cursor element
     const customCursor = document.createElement('div');

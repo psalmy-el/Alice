@@ -45,6 +45,8 @@ a:hover {
     color: #888888;
 }
 
+
+/* cursor change section*/
 /* Hide default cursor and use mic icon on clickable elements */
 .grid-item-inner, .social-link, .play-button {
     cursor: none !important;
@@ -75,6 +77,7 @@ body:has(.custom-cursor.active) * {
 .custom-cursor.active {
     opacity: 1;
 }
+/* End of Cursor change
 
 /* Layout */
 .container {
@@ -165,59 +168,68 @@ header.scrolled {
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #ff0f0f;
+    color: #0f33ff;
+}
+/* end of header navigatio*/
+
+/* vertican category*/
+.vertical-categories-container {
+    position: fixed;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    z-index: 100;
 }
 
-
-/* Dropdown styles */
-.dropdown {
-    position: relative;
-    
-}
-
-.dropdown-toggle::after {
-    content: '▼';
-    font-size: 10px;
-    margin-left: 5px;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    background-color: white;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
-    z-index: 300;
+.vertical-categories-list {
     list-style: none;
-    padding: 10px 0;
-    border-radius: 4px;
-    top: 100%;
-    left: 0;
-}
-
-.dropdown.active .dropdown-menu {
-    display: block;
-}
-
-.dropdown-menu li {
+    padding: 10px 5px;
     margin: 0;
-    padding: 0;
-    display: block;
-    box-shadow: none;
+    display: inline-block;
+    background: transparent;
+    border-radius: 8px;
 }
 
-.dropdown-menu li:hover {
-    background-color: #f5f5f5;
-    box-shadow: none;
-    transform: none;
+.vertical-categories-list li {
+    padding: 5px 0;
+    text-align: right;
 }
 
-.dropdown-menu a {
+.vertical-categories-list a {
     display: block;
-    padding: 8px 15px;
-    color: #333;
-    text-transform: none;
+    padding: 5px;
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 18px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    /* Make text vertical */
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
 }
+
+.vertical-categories-list a:hover,
+.vertical-categories-list a.active {
+    color: #003366;
+    transform: rotate(180deg) translateY(3px);
+}
+
+/* Remove original dropdown styles */
+.dropdown.mobile-only {
+    display: none !important;
+}
+
+.dropdown-menu{
+    display: none;
+}
+
+.dropdown-toggle.vertical-toggle,
+.dropdown-menu.vertical {
+    display: none !important;
+}
+/* end of vertical category*/
 
 /* Video Intro Section */
 .intro-section {
@@ -297,13 +309,22 @@ header.scrolled {
     background-color: #f0f0f0;
     transform: translateY(-2px);
 }
+/* end of intro video section*/
 
+/* masonry grid section*/
+
+/* masonry grid section*/
 .video-grid-section {
-    padding: 50px 0 100px;
+    padding-top: 80px;
+    padding-bottom: 100px;
 }
 
-.hidden-item {
-    display: none !important;
+/* Grid Layout and Items */
+.video-grid {
+    column-count: 4;
+    column-gap: 20px;
+    width: 100%;
+    position: relative;
 }
 
 .grid-title {
@@ -314,34 +335,15 @@ header.scrolled {
     letter-spacing: 1px;
 }
 
-.grid-item.hidden-item {
-    opacity: 0;
-    height: 0;
-    width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    overflow: hidden;
-}
-
-/* Ensure masonry has time to calculate layouts */
-.video-grid {
-    transition: height 0.3s ease-in-out;
-}
-
-/* CSS columns for masonry effect */
-.video-grid {
-    column-count: 4;
-    column-gap: 20px;
-    width: 100%;
-}
-
 .grid-item {
     break-inside: avoid;
     margin-bottom: 20px;
     width: 100%;
-    max-width: 100%;
-    
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+                opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    will-change: transform, opacity;
+    z-index: 1;
 }
 
 .grid-item-inner {
@@ -349,22 +351,31 @@ header.scrolled {
     overflow: hidden;
     cursor: pointer;
     display: block;
-    max-height: 350px;
-    max-width: 250px;
-    overflow: hidden;
-    background-color: #f0f0f0; /* Show a background while video loads */
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Video styling */
+/* Hidden Items */
+.hidden-item {
+    display: none !important;
+}
+
+/* Media Styling */
 .grid-item img,
 .grid-item video {
     width: 100%;
     height: auto;
-    max-height: 300px;
+    max-height: 350px;
     object-fit: cover;
-    display: block; /* Ensure block display */
-    opacity: 1; /* Make sure they're visible */
-    visibility: visible; /* Ensure visibility */
+    display: block;
+    transition: transform 0.4s ease-out;
+    will-change: transform;
+}
+
+/* Hover effect for media */
+.grid-item-inner:hover img,
+.grid-item-inner:hover video {
+    transform: scale(1.03);
 }
 
 /* Ensure poster images display properly */
@@ -383,62 +394,18 @@ header.scrolled {
     display: inline !important;
 }
 
-/* Hide play button completely on hover */
-.grid-item-inner:hover .play-button {
-    opacity: 0;
-    visibility: hidden; /* This ensures the button is completely removed from view */
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-/* Modify the existing play button style */
-.play-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease, visibility 0.3s ease;
-    z-index: 5;
-    opacity: 0.8;
-    visibility: visible;
-}
-
-.play-button:before {
-    content: '';
-    width: 0;
-    height: 0;
-    border-top: 12px solid transparent;
-    border-bottom: 12px solid transparent;
-    border-left: 20px solid #333;
-    margin-left: 5px;
-}
-
-.grid-item-inner:hover .play-button {
-    background-color: rgba(255, 255, 255, 1);
-    opacity: 1;
-}
-
-/* Overlay styling */
+/* Overlay Styling - Bottom Title Display */
 .grid-item-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 12px;
-    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 15px;
     transform: translateY(100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.4s ease-out;
+    will-change: transform;
 }
 
 .grid-item-inner:hover .grid-item-overlay {
@@ -446,17 +413,61 @@ header.scrolled {
 }
 
 .grid-item-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
-    margin-bottom: 3px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .grid-item-category {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 300;
+    font-style: italic;
+    opacity: 0.8;
 }
 
-/* Video modal */
+/* Hover effect specifically for bottom title display */
+.grid-item-overlay.bottom-title {
+    transform: translateY(100%);
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.grid-item-inner:hover .grid-item-overlay.bottom-title {
+    transform: translateY(0);
+}
+
+/* Animation and Transition Controls */
+.video-grid.no-transition * {
+    transition: none !important;
+}
+
+.video-grid.filtering {
+    pointer-events: none;
+}
+
+/* Category link styling */
+[data-category] {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+[data-category].active {
+    color: #333;
+    font-weight: 600;
+}
+
+[data-category].active:after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #333;
+}
+
+/* Video Modal Styling */
 .video-modal {
     display: none;
     position: fixed;
@@ -469,14 +480,11 @@ header.scrolled {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
 }
 
 .video-modal .modal-content {
-    border: none;
-    background-color: #000000a6;
-}
-
-.modal-content {
     position: relative;
     width: 80%;
     max-width: 1000px;
@@ -484,44 +492,48 @@ header.scrolled {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #000;
+    background-color: transparent;
+    border: none;
+    transform: translateY(20px);
+    transition: transform 0.5s ease-out;
+}
+
+.video-modal.active .modal-content {
+    transform: translateY(0);
 }
 
 .modal-video {
     width: 100%;
     height: auto;
-    max-height: 70vh; /* Limit video height */
-    object-fit: contain; /* Maintain aspect ratio */
-    background-color: #000; /* Black background for letterboxing */
+    max-height: 70vh;
+    object-fit: contain;
+    background-color: #000;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .close-modal {
     position: absolute;
-    top: -10px;
+    top: -40px;
     right: 0;
     font-size: 40px;
-    color: #fffefe;
+    color: #ffffff;
     cursor: pointer;
     background: none;
     border: none;
+    transition: color 0.3s ease;
 }
 
-.close-modal:hover{
+.close-modal:hover {
     color: #fc1717;
 }
 
-/* Add this to your CSS */
-.grid-item img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
+/* FLIP Animation Support */
+.grid-item.moving {
+    z-index: 2;
 }
 
-.grid-item-inner:hover .grid-item-overlay {
-    transform: translateY(0);
-}
+
+/* end of masonry grid section*/
 
 /* About Modal Styles */
 .modal {
@@ -547,10 +559,10 @@ header.scrolled {
   }
   
   .modal-dialog {
-    width: 95vw; /* 95% of viewport width */
-    max-width: 95vw;
-    height: 90vh; /* 90% of viewport height */
-    max-height: 90vh;
+    width: 40vw; 
+    max-width: 50vw;
+    height: 55vh;
+    max-height: 60vh;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -574,7 +586,7 @@ header.scrolled {
   background-color: #000;
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  position: relative; /* Enable absolute positioning inside */
+  position: relative;
 }
   
   .modal.fade .modal-dialog {
@@ -636,8 +648,6 @@ header.scrolled {
     font-weight: 500;
     }
 
-    
-  
     .btn-close {
         position: absolute !important;
         top: 1rem !important;
@@ -672,18 +682,7 @@ header.scrolled {
     line-height: 1.8;
     font-size: 1.1rem;
   }
-  
-  .modal-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end; /* Align buttons to the right */
-    padding: 1.5rem;
-    border-top: 1px solid #dee2e6;
-    border-bottom-right-radius: calc(0.3rem - 1px);
-    border-bottom-left-radius: calc(0.3rem - 1px);
-  }
-  
+   
   .modal-backdrop {
     position: fixed;
     top: 0;
@@ -703,39 +702,11 @@ header.scrolled {
     opacity: 0.5;
   }
   
-  /* Modal button styling */
-  .btn {
-    display: inline-block;
-    font-weight: 400;
-    text-align: center;
-    vertical-align: middle;
-    user-select: none;
-    border: 1px solid transparent;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    cursor: pointer;
-  }
-  
-  .btn-secondary {
-    color: #fff;
-    background-color: #6c757d;
-    border-color: #6c757d;
-    margin-left: auto; /* Push to the right */
-    margin-right: 0;
-  }
-  
-  .btn-secondary:hover {
-    color: #000000;
-    background-color: #ffd0e3;
-    border-color: #545b62;
-  }
-  
   body.modal-open {
     overflow: hidden;
   }
+
+  /* end of about modal*/
 
   /* Footer */
   footer {
@@ -865,10 +836,13 @@ header.scrolled {
 
 .copyright {
     font-size: 12px;
-    color: #3a3838;
+    color: #888;
+    margin-top: 20px;
 }
 
-/* Responsive footer */
+/* end of footer*/
+
+/* Responsive  */
 @media (max-width: 992px) {
     .footer-container {
       grid-template-columns: repeat(2, 1fr);
@@ -879,12 +853,6 @@ header.scrolled {
 .footer-container {
 grid-template-columns: 1fr;
 }
-}
-
-.copyright {
-    font-size: 12px;
-    color: #888;
-    margin-top: 20px;
 }
 
 /* Responsive Styles */
@@ -960,7 +928,18 @@ grid-template-columns: 1fr;
     display: block;
     }
 
-    .dropdown-toggle {
+    .vertical-categories-container {
+        display: none !important; /* Force hide on mobile */
+    }
+    
+    /* Show categories in dropdown menu for mobile */
+    .mobile-categories-menu {
+        display: block;
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .mobile-categories-menu .dropdown-toggle {
         display: block;
         width: 100%;
         text-align: center;
@@ -969,10 +948,10 @@ grid-template-columns: 1fr;
         border-radius: 4px;
         margin-bottom: 5px;
         position: relative;
+        cursor: pointer;
     }
     
-    .dropdown-menu {
-        display: none;
+    .mobile-categories-menu .dropdown-menu {
         position: static !important;
         width: 100%;
         background-color: white;
@@ -983,25 +962,33 @@ grid-template-columns: 1fr;
         z-index: 500;
     }
     
-    .dropdown-menu li {
+    .mobile-categories-menu .dropdown-menu li {
         border-bottom: 1px solid #f0f0f0;
         margin: 0 !important;
         padding: 0 !important;
     }
     
-    .dropdown-menu li:last-child {
+    .mobile-categories-menu .dropdown-menu li:last-child {
         border-bottom: none;
     }
     
-    .dropdown-menu a {
+    .mobile-categories-menu .dropdown-menu a {
         display: block;
         padding: 12px 15px !important;
         text-align: center;
         font-size: 16px !important;
+        color: #0066cc;
     }
     
-    .dropdown-menu a:active {
+    .mobile-categories-menu .dropdown-menu a:active,
+    .mobile-categories-menu .dropdown-menu a.active {
         background-color: #f0f0f0;
+        color: #003366;
+    }
+    
+    /* Hide original mobile dropdowns if they exist */
+    .dropdown.mobile-only {
+        display: none !important;
     }
     
     /* Center images and videos */

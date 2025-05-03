@@ -1,167 +1,223 @@
 @font-face {
-    font-family: 'Asket Narrow';
-    src: url('/fonts/AsketNarrow-Regular.woff2') format('woff2'),
-         url('/fonts/AsketNarrow-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: 'Asket Narrow';
-    src: url('/fonts/AsketNarrow-Bold.woff2') format('woff2'),
-         url('/fonts/AsketNarrow-Bold.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Asket Narrow', 'Helvetica Neue', Arial, sans-serif;
-  }
+  font-family: 'Asket Narrow';
+  src: url('/fonts/AsketNarrow-Regular.woff2') format('woff2'),
+       url('/fonts/AsketNarrow-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
-#previews {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .preview-item {
-    width: 150px;
-    height: 150px;
-    border: 1px solid #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .preview-item img, .preview-item video {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover;
-  }
-  .remove-preview {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .upload-area {
-    height: 150px;
-    border: 2px dashed #ccc;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-bottom: 20px;
-  }
-  .primary-badge {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    padding: 2px 5px;
-    font-size: 10px;
-    border-radius: 3px;
-  }
-  /* Custom styles for notification modal */
-  .notification-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-  .notification-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 5px;
-    max-width: 400px;
-    text-align: center;
-  }
-  .success-icon {
-    color: #28a745;
-    font-size: 48px;
-    margin-bottom: 20px;
-  }
-  .error-icon {
-    color: #dc3545;
-    font-size: 48px;
-    margin-bottom: 20px;
-  }
+@font-face {
+  font-family: 'Asket Narrow';
+  src: url('/fonts/AsketNarrow-Bold.woff2') format('woff2'),
+       url('/fonts/AsketNarrow-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
 
-  .upload-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-  }
-  
-  .upload-popup-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 500px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  }
-  
-  .upload-popup-content h4 {
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  /* Progress bar styling */
-  .progress {
-    height: 25px;
-    border-radius: 5px;
-    overflow: hidden;
-  }
-  
-  .progress-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    transition: width 0.3s ease;
-  }
-  
-  .bg-info {
-    background-color: #17a2b8 !important;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Asket Narrow', 'Helvetica Neue', Arial, sans-serif;
+}
 
-  /* Add these styles to your edit.css file */
+/* Navbar styling for consistent header */
+.navbar {
+  padding: 0.5rem 1rem;
+}
 
-.poster-upload-area {
+.navbar-logo {
+  max-height: 40px;
+  width: auto;
+}
+
+.small-logo {
+  max-height: 30px !important;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link {
+  padding: 0.5rem 1rem;
+  color: white;
+  text-decoration: none;
+}
+
+.small-text {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+}
+
+#previews, #newFilePreviews, #posterPreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.preview-item {
+  width: 150px;
+  height: 150px;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin: 0 !important;
+}
+
+#newFilePreviews .preview-item {
+  display: inline-flex !important; /* Force consistent display */
+  float: none !important; /* Prevent floating */
+}
+
+#previews .preview-item, 
+#newFilePreviews .preview-item, 
+#posterPreview .preview-item {
+  flex: 0 0 auto;
+}
+
+.preview-item img, .preview-item video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+.remove-preview {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.upload-area {
+  height: 150px;
   border: 2px dashed #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.primary-badge {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 2px 5px;
+  font-size: 10px;
+  border-radius: 3px;
+}
+
+/* Custom styles for notification modal */
+.notification-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 5px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.success-icon {
+  color: #28a745;
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.error-icon {
+  color: #dc3545;
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.upload-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.upload-popup-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.upload-popup-content h4 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Progress bar styling */
+.progress {
+  height: 25px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: width 0.3s ease;
+}
+
+.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+/* Poster styling */
+.poster-upload-area {
+  border: 2px dashed #007bff;  /* Changed to blue to match theme */
   border-radius: 5px;
   padding: 20px;
   text-align: center;
@@ -170,7 +226,7 @@
 }
 
 .poster-upload-area:hover {
-  border-color: #007bff;
+  border-color: #0056b3;  /* Darker blue on hover */
   background-color: rgba(0, 123, 255, 0.05);
 }
 
@@ -204,4 +260,52 @@
 
 .poster-remove-btn:hover {
   background: rgba(255, 0, 0, 0.7);
+}
+
+/* Change buttons to blue theme */
+.btn-warning {
+  background-color: #007bff !important;
+  border-color: #007bff !important;
+  color: white !important;
+}
+
+.btn-warning:hover {
+  background-color: #0069d9 !important;
+  border-color: #0062cc !important;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .navbar-logo {
+    max-height: 28px;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .small-text {
+    font-size: 0.75rem !important;
+    padding: 0.4rem 0.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-logo {
+    max-height: 30px;
+  }
+
+  .nav-link {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .form-control, .form-select, .btn {
+    font-size: 0.9rem;
+  }
 }

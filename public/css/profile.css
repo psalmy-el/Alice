@@ -1,0 +1,74 @@
+.sidebar {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+}
+.sidebar .nav-link {
+    color: #333;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+.password-input-group {
+    position: relative;
+}
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+}
+/* Responsive styles */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    .navbar-brand{
+        font-size: 14px;
+    }
+
+    .card-title, .card-header h4 {
+        font-size: 18px;
+    }
+    .btn {
+        font-size: 14px;
+        padding: 0.25rem 0.5rem;
+    }
+    .form-label {
+        font-size: 14px;
+    }
+    .form-control {
+        font-size: 14px;
+        padding: 0.25rem 0.5rem;
+    }
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 14px;
+    }
+    .alert {
+        padding: 0.5rem;
+        font-size: 14px;
+    }
+    .small-screen-nav {
+        font-size: 13px;
+        padding: 0.25rem 0.5rem !important;
+    }
+}
+/* Force tab content to stay in a single row */
+.nav-tabs {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+.nav-tabs .nav-item {
+    flex-shrink: 0;
+}

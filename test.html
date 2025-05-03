@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation Test</title>
+    <link rel="stylesheet" href="fixed-animation-css.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .category-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .category-filters a {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .category-filters a.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Animation Test</h1>
+        
+        <!-- Category filters -->
+        <div class="category-filters">
+            <a href="#" data-category="all" class="active">All</a>
+            <a href="#" data-category="category1">Category 1</a>
+            <a href="#" data-category="category2">Category 2</a>
+            <a href="#" data-category="category3">Category 3</a>
+        </div>
+        
+        <!-- Video grid -->
+        <div class="video-grid-section">
+            <div class="video-grid">
+                <!-- Sample items with different categories -->
+                
+                <!-- Category 1 items -->
+                <div class="grid-item" data-category="category1">
+                    <div class="grid-item-inner">
+                        <img src="/public/uploads/files-1744275204265-836395338.jpg" alt="Item 1">
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title">Item 1</h3>
+                            <p class="grid-item-category">Category 1</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-item" data-category="category1">
+                    <div class="grid-item-inner">
+                        <img src="/public/uploads/files-1744292884873-910003899.png" alt="Item 2">
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title">Item 2</h3>
+                            <p class="grid-item-category">Category 1</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category 2 items -->
+                <div class="grid-item" data-category="category2">
+                    <div class="grid-item-inner">
+                        <img src="/public/uploads/files-1744275204338-515674412.jpg" alt="Item 3">
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title">Item 3</h3>
+                            <p class="grid-item-category">Category 2</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-item" data-category="category2">
+                    <div class="grid-item-inner">
+                        <img src="/public/uploads/files-1744277386021-824388633.png" alt="Item 4">
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title">Item 4</h3>
+                            <p class="grid-item-category">Category 2</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category 3 items -->
+                <div class="grid-item" data-category="category3">
+                    <div class="grid-item-inner">
+                        <img src="/public/uploads/files-1744277386009-203703733.jpg" alt="Item 5">
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title">Item 5</h3>
+                            <p class="grid-item-category">Category 3</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-item" data-category="category3">
+                    <div class="grid-item-inner">
+                        <img src="/public/uploads/files-1744277386009-203703733.jpg" alt="Item 6">
+                        <div class="grid-item-overlay">
+                            <h3 class="grid-item-title">Item 6</h3>
+                            <p class="grid-item-category">Category 3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debug info to show current animation -->
+        <div class="debug-info">
+            Current Animation: <span id="current-animation">None</span>
+        </div>
+    </div>
+
+    <!-- Load Masonry (optional but recommended) -->
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+    <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+    
+    <!-- Load our animation script -->
+    <script src="fixed-animation-script.js"></script>
+    
+    <!-- Additional debug code -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentAnimation = document.getElementById('current-animation');
+            const videoGrid = document.querySelector('.video-grid');
+            
+            // Update debug info whenever animation changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        if (videoGrid.classList.contains('animation-fade')) {
+                            currentAnimation.textContent = 'Fade';
+                        } else if (videoGrid.classList.contains('animation-slide')) {
+                            currentAnimation.textContent = 'Slide';
+                        } else if (videoGrid.classList.contains('animation-zoom')) {
+                            currentAnimation.textContent = 'Zoom';
+                        } else if (videoGrid.classList.contains('animation-flip')) {
+                            currentAnimation.textContent = 'Flip';
+                        } else if (videoGrid.classList.contains('animation-shuffle')) {
+                            currentAnimation.textContent = 'Shuffle';
+                        } else {
+                            currentAnimation.textContent = 'None';
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(videoGrid, { attributes: true });
+        });
+    </script>
+</body>
+</html>

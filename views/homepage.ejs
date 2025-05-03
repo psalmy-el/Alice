@@ -14,30 +14,21 @@
     <!-- Header -->
     <header>
         <div class="container">
-            <div class="header-inner">
-                <a href="/" class="logo">
-                    <img src="<%= logoPath %>" alt="<%= companyName %>" class="logo-img">
-                </a>
-                <button class="nav-toggle">☰</button>
-                <nav class="main-nav">
-                    <button class="close-nav">✕</button>
-                    <ul>
-                        <li><a href="#" class="about-link">About</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle">Categories</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#" data-category="all">All</a></li>
-                                <% categories.forEach(category => { %>
-                                <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
-                                <% }); %>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+          <div class="header-inner">
+            <a href="/" class="logo">
+              <img src="<%= logoPath %>" alt="<%= companyName %>" class="logo-img">
+            </a>
+            <button class="nav-toggle">☰</button>
+            <nav class="main-nav">
+              <button class="close-nav">✕</button>
+              <ul>
+                <li><a href="/">alice engdahl</a></li>
+                <li><a href="#" class="about-link">(about)</a></li>
+              </ul>
+            </nav>
+          </div>
         </div>
-    </header>
+      </header>
 
     <!-- Video Intro Section -->
     <section class="intro-section">
@@ -50,7 +41,7 @@
                 <div class="intro-overlay">
                     <h1 class="intro-heading"><%= introHeading %></h1>
                     <p class="intro-description"><%= introDescription %></p>
-                    <a href="/contact" class="contact-button">Contact Us</a>
+                    <a href="#" class="about-link contact-button">Contact Us</a>
                 </div>
             </div>
         </div>
@@ -87,7 +78,6 @@
                                           </div>
                                         <% } %>
                                       <% } %>
-                                    <div class="play-button"></div>
                                 <% } else { %>
                                     <!-- Handle broken item gracefully -->
                                     <div class="broken-item">
@@ -105,13 +95,13 @@
             </div>
         </div>
     </section>
-<!-- And make sure the category dropdown has the correct data-category values -->
-<ul class="dropdown-menu">
-    <li><a href="#" data-category="all">All</a></li>
-    <% categories.forEach(category => { %>
-    <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
-    <% }); %>
-</ul>
+        <!-- And make sure the category dropdown has the correct data-category values -->
+        <ul class="dropdown-menu">
+            <li><a href="#" data-category="all">All</a></li>
+            <% categories.forEach(category => { %>
+            <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
+            <% }); %>
+        </ul>
 
     <!-- Video Modal -->
     <div class="video-modal">
@@ -129,7 +119,7 @@
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="aboutModalLabel">About Engdahls & Co</h5>
+              <h5 class="modal-title" id="aboutModalLabel">Alice Engdahls & Co</h5>
               
             </div>
             <button type="button" class="btn-close" aria-label="Close"></button>
@@ -139,12 +129,11 @@
                   <p><%= paragraph %></p>
                 <% }); %>
               <% } else { %>
-                <p>Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.</p>
-                <p>Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.</p>
+                <p>Alice Engdahls</p>
+                <p>Producer at Rio Pictures</p>
+                <p>Send me an email</p>
+
               <% } %>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary">Close</button>
             </div>
           </div>
         </div>

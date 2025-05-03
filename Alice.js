@@ -6,6 +6,7 @@ const { pool, testConnection } = require('./config/database');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const flash = require('connect-flash');
+const mailer = require('./config/mailer');
 
 require('dotenv').config();
 
@@ -93,14 +94,28 @@ app.use((err, req, res, next) => {
 // Start server and test database connection
 app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Server running on port ${PORT}`);
+  // Test database connection
   try {
-    const connected = await testConnection();
-    if (connected) {
-      console.log('Database connected successfully');
+    const dbConnected = await testConnection();
+    if (dbConnected) {
+      console.log('✅ Database connected successfully');
     } else {
-      console.log('Database connection failed');
+      console.log('❌ Database connection failed');
     }
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('❌ Database connection error:', error);
+  }
+  
+  // Test email connection
+  try {
+    const emailConnected = await mailer.testConnection();
+    if (emailConnected) {
+      console.log('✅ Email service ready to send mail');
+    } else {
+      console.log('❌ Email service not configured properly');
+      console.log('   Please check your .env file for EMAIL_USER and EMAIL_APP_PASSWORD');
+    }
+  } catch (error) {
+    console.error('❌ Email service connection error:', error);
   }
 });

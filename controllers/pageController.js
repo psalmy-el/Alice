@@ -39,7 +39,7 @@ exports.getHomepage = async (req, res) => {
     // Get company information (you might want to store this in a database later)
     const companyInfo = {
       name: 'Engdahls & Co Creative Studios',
-      description: 'Engdahls & Co Creative Studios is an innovative and versatile production company offering high-quality commercial films and video productions. We create engaging and visually striking stories that help our clients reach their target audiences through creative and tailored solutions.',
+      description: 'Engdahls & Co Creative Studios is an innovative and versatile production company offering high-quality commercial films, beautiful pictures and video productions. We create engaging and visually striking stories that help our clients reach their target audiences through creative and tailored solutions.',
       logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg',
       introHeading: 'Movie Productions'
     };
@@ -47,14 +47,11 @@ exports.getHomepage = async (req, res) => {
     // Footer content
     const footerContent = {
       socialLinks: [
-        { name: 'Facebook', url: '#', icon: 'fab fa-facebook-f' },
-        { name: 'YouTube', url: '#', icon: 'fab fa-youtube' },
         { name: 'Instagram', url: '#', icon: 'fab fa-instagram' }
       ],
       quickLinks: [
         { name: 'Home', url: '/' },
-        { name: 'About', url: '/about' },
-        { name: 'Contact', url: '/contact' }
+        { name: 'About', url: '/about' }
       ],
       services: [
         { name: 'Commercial Production', url: '#video-grid-section' },
@@ -66,27 +63,15 @@ exports.getHomepage = async (req, res) => {
         { name: 'Music Videos', url: '#video-grid-section' }
       ],
       contactInfo: [
-        { icon: '📍', text: '123 Creative Avenue, Studio City, CA 90210' },
-        { icon: '📱', text: '+1 (555) 123-4567' },
-        { icon: '✉️', text: 'info@engdahls.co' }
+        { icon: '✉️', text: 'alice@rio.pictures' }
       ]
     };
 
     // About modal content
     const aboutContent = [
-      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
-      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
-      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
-      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
-      'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.',
+      'Alice Engdahls',
+      'Producer at Rio Pictures',
+      'send me an email',
       'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
     ];
 
@@ -123,7 +108,9 @@ exports.getAboutPage = (req, res) => {
   
   // Create the about content
   const aboutContent = [
-    'Engdahls & Co Creative Studios is a versatile production company specializing in high-quality commercial films and video productions that tell engaging stories for clients worldwide.',
+    'Alice Engdahls',
+    'Producer at Rio Pictures',
+    'send me an email',
     'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
   ];
   

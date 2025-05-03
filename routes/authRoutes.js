@@ -19,6 +19,9 @@ router.post('/forgot-password', isGuest, authController.forgotPassword);
 router.get('/reset-password/:token', isGuest, authController.getResetPasswordForm);
 router.post('/reset-password/:token', isGuest, authController.resetPassword);
 
+// Change password route
+router.post('/profile/change-password', isAuthenticated, authController.changePassword);
+
 // Profile routes
 router.get('/profile', isAuthenticated, authController.getProfile);
 router.post('/profile', isAuthenticated, authController.updateProfile);

@@ -31,11 +31,11 @@
   padding: 20px 30px;
   background-color: #343a40;
   width: 100%;
-  position: fixed; /* Fix the header at the top */
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000; /* Higher z-index to keep it above other content */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adds shadow for better visual separation */
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .logo-section {
@@ -63,7 +63,7 @@
 .logout-btn {
   color: white;
   text-decoration: none;
-  background-color: #dc3545;
+  background-color: #2956eb;
   padding: 8px 15px;
   border-radius: 4px;
   font-weight: bold;
@@ -75,119 +75,340 @@
   background-color: #1d0608;
 }
 
+.nav-link {
+  color: white;
+  text-decoration: none;
+  background-color: #2956eb;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  background-color: #1d0608;
+  color: white;
+}
+
 /* Add padding to the body to prevent content from hiding behind the fixed header */
 body {
-  padding-top: 70px; /* Adjust this value based on your header height */
+  padding-top: 70px;
   margin: 0;
   background-color: #fceee8;
 }
 
+/* Media card styles */
 .media-card {
-    height: auto;
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 20px;
-    cursor: pointer; /* Add pointer cursor to show it's clickable */
+  height: auto;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+.media-card img, .media-card video {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+}
+.media-actions {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 10;
+}
+.media-preview {
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  min-height: 200px;
+}
+video.card-img-top {
+  background-color: #000;
+}
+
+/* Video Player Controls */
+.video-container {
+  position: relative;
+  width: 100%;
+  background-color: #000;
+}
+
+.mobile-video-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.video-control-btn {
+  background-color: transparent;
+  color: white;
+  border: none;
+  font-size: 18px;
+  margin: 0 10px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.video-control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Media Viewer Modal Styles */
+.media-viewer-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  z-index: 2000;
+  overflow: hidden;
+}
+.media-viewer-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.media-viewer-item {
+  max-width: 80%;
+  max-height: 80vh;
+  transition: opacity 0.3s;
+}
+.media-viewer-item img, .media-viewer-item video {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border: 2px solid #fff;
+  background-color: #000;
+}
+.media-viewer-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 2010;
+}
+.media-viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 36px;
+  cursor: pointer;
+  z-index: 2010;
+  background-color: rgba(0,0,0,0.3);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+.media-viewer-nav:hover {
+  background-color: rgba(0,0,0,0.7);
+}
+.media-viewer-prev {
+  left: 30px;
+}
+.media-viewer-next {
+  right: 30px;
+}
+.media-viewer-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  background-color: rgba(0,0,0,0.5);
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+
+/* Mobile menu */
+.mobile-menu-toggle {
+  display: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+/* Mobile nav menu */
+.mobile-nav-menu {
+  display: none;
+  position: fixed;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  background-color: #343a40;
+  z-index: 999;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 15px;
+  flex-direction: column;
+}
+
+.mobile-nav-menu .nav-item {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.mobile-nav-menu .nav-link,
+.mobile-nav-menu .logout-btn,
+.mobile-nav-menu .btn-primary {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  text-align: left;
+}
+
+/* Make mobile menu toggle more visible and clickable */
+.mobile-menu-toggle i {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 8px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.mobile-menu-toggle i:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-nav-menu.show {
+  display: flex;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  .media-card img, .media-card video {
-    width: 100%;
-    height: auto;
-    max-height: 400px;
-    object-fit: contain;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .media-actions {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    z-index: 10;
-  }
-  .media-preview {
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    min-height: 200px;
-  }
-  video.card-img-top {
-    background-color: #000;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 15px;
   }
   
-  /* Media Viewer Modal Styles */
-  .media-viewer-modal {
+  .logo-section img {
+    height: 30px;
+  }
+  
+  .nav-actions {
     display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.9);
-    z-index: 2000;
-    overflow: hidden;
   }
-  .media-viewer-content {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  
+  .mobile-menu-toggle {
+    display: block;
   }
-  .media-viewer-item {
-    max-width: 80%;
-    max-height: 80vh;
-    transition: opacity 0.3s;
+  
+  .mobile-video-controls {
+    opacity: 1;
+    display: flex !important;
   }
-  .media-viewer-item img, .media-viewer-item video {
-    max-width: 100%;
-    max-height: 80vh;
-    object-fit: contain;
-    border: 2px solid #fff;
-    background-color: #000;
-  }
-  .media-viewer-close {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-    z-index: 2010;
-  }
+  
   .media-viewer-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    font-size: 36px;
-    cursor: pointer;
-    z-index: 2010;
-    background-color: rgba(0,0,0,0.3);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
   }
-  .media-viewer-nav:hover {
-    background-color: rgba(0,0,0,0.7);
-  }
+  
   .media-viewer-prev {
-    left: 30px;
+    left: 15px;
   }
+  
   .media-viewer-next {
-    right: 30px;
+    right: 15px;
   }
-  .media-viewer-counter {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    background-color: rgba(0,0,0,0.5);
-    padding: 5px 15px;
-    border-radius: 15px;
+  
+  .media-viewer-close {
+    top: 15px;
+    right: 15px;
+  }
+  
+  /* Adjust alert size for mobile */
+  .alert {
+    padding: 10px;
     font-size: 14px;
+    width: 90%;
+    margin: 0 auto;
   }
+}
+
+@media (max-width: 576px) {
+  .header-container {
+    padding: 10px;
+  }
+  
+  .logo-section img {
+    height: 25px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .card-text {
+    font-size: 0.9rem;
+  }
+  
+  .media-viewer-nav {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+  
+  .media-viewer-counter {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+  
+  /* Ensure video controls are always visible on small screens */
+  .mobile-video-controls {
+    opacity: 1 !important;
+  }
+  
+  .video-control-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}

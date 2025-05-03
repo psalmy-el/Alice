@@ -9,7 +9,7 @@ async function createAdmin() {
     const adminDetails = {
       username: 'Alice',
       email: 'abedusamuel@gmail.com',
-      password: 'Alice123@'  // Change this to a secure password
+      password: 'Alice123@' 
     };
 
     // Hash the password
@@ -24,16 +24,34 @@ async function createAdmin() {
 
     if (existingAdmin.length > 0) {
       console.log('Admin user already exists!');
-      process.exit(0);
+    } else {
+      // Insert admin into database
+      await db.execute(
+        'INSERT INTO admins (username, email, password) VALUES (?, ?, ?)',
+        [adminDetails.username, adminDetails.email, hashedPassword]
+      );
+      console.log('Admin user created successfully!');
     }
-
-    // Insert admin into database
-    await db.execute(
-      'INSERT INTO admins (username, email, password) VALUES (?, ?, ?)',
-      [adminDetails.username, adminDetails.email, hashedPassword]
-    );
-
-    console.log('Admin user created successfully!');
+    
+    // Check if last_login column exists
+    const [columns] = await db.execute(`
+      SELECT COLUMN_NAME 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = DATABASE() 
+      AND TABLE_NAME = 'admins' 
+      AND COLUMN_NAME = 'last_login'
+    `);
+    
+    // Add last_login column if it doesn't exist
+    if (columns.length === 0) {
+      console.log('Adding last_login column to admins table...');
+      await db.execute(`
+        ALTER TABLE admins ADD COLUMN last_login DATETIME NULL DEFAULT NULL
+      `);
+      console.log('Last login column added successfully.');
+    } else {
+      console.log('Last login column already exists.');
+    }
     
     // Create password_resets table if it doesn't exist
     await db.execute(`
@@ -49,7 +67,7 @@ async function createAdmin() {
     console.log('Password reset table verified.');
     process.exit(0);
   } catch (error) {
-    console.error('Error creating admin user:', error);
+    console.error('Error during database setup:', error);
     process.exit(1);
   }
 }

@@ -89,6 +89,16 @@ class Admin {
     await db.execute(query, [details.username, details.email, adminId]);
     return true;
   }
+
+  // Update last login timestamp
+  static async updateLastLogin(adminId) {
+    const query = `
+      UPDATE admins SET last_login = NOW() WHERE id = ?
+    `;
+    
+    await db.execute(query, [adminId]);
+    return true;
+  }
 }
 
 module.exports = Admin;

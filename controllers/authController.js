@@ -12,7 +12,6 @@ exports.getLoginForm = (req, res) => {
   res.render('login', { error: req.flash('error') });
 };
 
-// Handle login
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -32,6 +31,9 @@ exports.login = async (req, res) => {
       req.flash('error', 'Invalid username or password');
       return res.redirect('/login');
     }
+    
+    // Update last login timestamp
+    await Admin.updateLastLogin(admin.id);
     
     // Set session
     req.session.adminId = admin.id;
@@ -103,16 +105,23 @@ exports.forgotPassword = async (req, res) => {
     const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${token}?email=${encodeURIComponent(email)}`;
     
     // Send email
-    await mailer.sendPasswordReset(email, {
+    const emailSent = await mailer.sendPasswordReset(email, {
       username: admin.username,
       resetUrl
     });
     
-    req.flash('success', 'Password reset link sent to your email');
+    if (emailSent) {
+      req.flash('success', 'Password reset link sent to your email');
+    } else {
+      // If email fails, show the token on screen (not ideal for production, but works for development)
+      console.log('Using fallback for reset URL display due to email failure');
+      req.flash('success', `Email sending failed. Use this link to reset: ${resetUrl}`);
+    }
+    
     res.redirect('/forgot-password');
   } catch (error) {
     console.error('Forgot password error:', error);
-    req.flash('error', 'Failed to send password reset email');
+    req.flash('error', 'Failed to process password reset request');
     res.redirect('/forgot-password');
   }
 };
@@ -171,10 +180,15 @@ exports.resetPassword = async (req, res) => {
     // Delete reset token
     await Admin.deleteResetToken(email);
     
-    // Send confirmation email
-    await mailer.sendPasswordChangeNotification(email, {
-      username: admin.username
-    });
+    // Try to send confirmation email, but don't fail if it doesn't work
+    try {
+      await mailer.sendPasswordChangeNotification(email, {
+        username: admin.username
+      });
+    } catch (emailError) {
+      console.error('Email notification failed, but password was reset:', emailError);
+      // We'll continue anyway since the password was reset successfully
+    }
     
     req.flash('success', 'Password reset successful. You can now login with your new password.');
     res.redirect('/login');
@@ -182,6 +196,65 @@ exports.resetPassword = async (req, res) => {
     console.error('Reset password error:', error);
     req.flash('error', 'Failed to reset password');
     res.redirect('/forgot-password');
+  }
+};
+
+// Handle password change
+exports.changePassword = async (req, res) => {
+  try {
+    const { current_password, new_password, confirm_new_password } = req.body;
+    
+    // Get admin
+    const admin = await Admin.getByUsername(req.session.adminUsername);
+    
+    if (!admin) {
+      req.session.destroy();
+      return res.redirect('/login');
+    }
+    
+    // Verify current password
+    const match = await bcrypt.compare(current_password, admin.password);
+    
+    if (!match) {
+      req.flash('error', 'Current password is incorrect');
+      return res.redirect('/profile');
+    }
+    
+    // Validate new password
+    if (new_password !== confirm_new_password) {
+      req.flash('error', 'New passwords do not match');
+      return res.redirect('/profile');
+    }
+    
+    // Check password strength
+    if (new_password.length < 8) {
+      req.flash('error', 'Password must be at least 8 characters long');
+      return res.redirect('/profile');
+    }
+    
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    
+    // Update password
+    await Admin.updatePassword(admin.id, hashedPassword);
+    
+    // Send confirmation email
+    const emailSent = await mailer.sendPasswordChangeNotification(admin.email, {
+      username: admin.username
+    });
+    
+    if (emailSent) {
+      console.log('Password change notification email sent successfully');
+    } else {
+      console.warn('Failed to send password change notification email');
+    }
+    
+    req.flash('success', 'Password changed successfully');
+    res.redirect('/profile');
+  } catch (error) {
+    console.error('Change password error:', error);
+    req.flash('error', 'Failed to change password');
+    res.redirect('/profile');
   }
 };
 
@@ -195,8 +268,12 @@ exports.getProfile = async (req, res) => {
       return res.redirect('/login');
     }
     
+    // Create a new object without the password field
+    const safeAdmin = { ...admin };
+    delete safeAdmin.password;  // Remove password hash from the object
+    
     res.render('profile', { 
-      admin,
+      admin: safeAdmin,  // Pass the cleaned object to the template
       error: req.flash('error'),
       success: req.flash('success')
     });
@@ -234,12 +311,17 @@ exports.updateProfile = async (req, res) => {
     // Update session
     req.session.adminUsername = username;
     
-    // Send notification email if email changed
+    // Send notification email if email changed, but don't fail if it doesn't work
     if (email !== admin.email) {
-      await mailer.sendEmailChangeNotification(admin.email, {
-        username: admin.username,
-        newEmail: email
-      });
+      try {
+        await mailer.sendEmailChangeNotification(admin.email, {
+          username: admin.username,
+          newEmail: email
+        });
+      } catch (emailError) {
+        console.error('Email notification failed, but profile was updated:', emailError);
+        // We'll continue anyway since the profile was updated successfully
+      }
     }
     
     req.flash('success', 'Profile updated successfully');
