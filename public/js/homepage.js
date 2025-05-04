@@ -57,20 +57,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const gridItems = document.querySelectorAll('.grid-item');
     const categoryLinks = document.querySelectorAll('[data-category]');
     let currentCategory = 'all';
+    let isProcessingCategoryClick = false; // Flag to prevent interference between category clicks and item clicks
     
     // Initial setup variables
     let msnry;
-    const transitionDuration = 600; // Transition duration in ms
+    const transitionDuration = 1200; // Animation duration
     
     // Configure all videos
     setupVideos();
     
-    // Add position tracking index to each item for better position tracking
+    // Add position tracking index to each item
     gridItems.forEach((item, index) => {
         item.setAttribute('data-index', index);
     });
     
-    // Initialize masonry with visible tracking
+    // Initialize masonry
     initMasonry();
     
     // Add event listeners for category selection
@@ -78,9 +79,16 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
+            // Prevent multiple clicks from happening
+            if (isProcessingCategoryClick) return;
+            isProcessingCategoryClick = true;
+            
             // Get selected category
             const category = this.getAttribute('data-category');
-            if (category === currentCategory) return;
+            if (category === currentCategory) {
+                isProcessingCategoryClick = false;
+                return;
+            }
             
             // Update active status on links
             categoryLinks.forEach(l => l.classList.remove('active'));
@@ -89,34 +97,37 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update current category
             currentCategory = category;
             
-            // Filter with visible sliding animation
-            filterWithSlideAnimation(category);
+            // Filter with sliding animation
+            filterItems(category);
             
-            // Scroll to grid section with offset for header
+            // Scroll behavior - FURTHER REDUCED SCROLL OFFSET
             const videoGridSection = document.querySelector('.video-grid-section');
             if (videoGridSection) {
                 const headerHeight = document.querySelector('header')?.offsetHeight || 80;
-                const sectionPosition = videoGridSection.getBoundingClientRect().top + window.pageYOffset;
-                const offsetPosition = sectionPosition - headerHeight - 20;
+                // Only scroll a very small amount to maintain proximity to header
+                const sectionPosition = videoGridSection.offsetTop;
+                const offsetPosition = sectionPosition - headerHeight - 10; // Even smaller offset (reduced from 30 to 10)
                 
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }, 50);
             }
+            
+            // Reset processing flag after animation completes
+            setTimeout(() => {
+                isProcessingCategoryClick = false;
+            }, transitionDuration + 200);
         });
     });
     
-    // Setup hover effects for grid items
-    setupHoverEffects();
-    
-    /**
-     * Initialize Masonry layout
-     */
+    // Initialize Masonry layout
     function initMasonry() {
         if (typeof Masonry !== 'undefined' && typeof imagesLoaded !== 'undefined') {
             imagesLoaded(videoGrid, function() {
-                // Create new masonry instance
+                // Create new masonry instance with zero transition duration initially
                 msnry = new Masonry(videoGrid, {
                     itemSelector: '.grid-item:not(.hidden-item)',
                     columnWidth: '.grid-item:not(.hidden-item)',
@@ -125,169 +136,133 @@ document.addEventListener('DOMContentLoaded', function() {
                     transitionDuration: 0, // No transition initially
                     stagger: 0
                 });
+                
+                // Run layout again to ensure proper positioning
+                setTimeout(() => {
+                    msnry.layout();
+                }, 100);
             });
         }
     }
     
     /**
-     * Filter items with sliding animation ensuring ALL items slide
-     * rather than fade/disappear
+     * Simplified and fixed filter function - Only for category filtering
      */
-    function filterWithSlideAnimation(category) {
+    function filterItems(category) {
         // Prevent interaction during animation
         videoGrid.classList.add('filtering');
+        console.log(`Filtering to category: ${category}`);
         
-        // STEP 1: Capture current positions of ALL items (visible and hidden)
-        const currentPositions = {};
+        // STEP 1: Mark items for show/hide but don't change visibility yet
         gridItems.forEach(item => {
-            // Get current display state
-            const wasHidden = item.classList.contains('hidden-item');
-            
-            // Temporarily make all items visible to get their real positions
-            if (wasHidden) {
-                item.classList.remove('hidden-item');
-                item.style.display = '';
-                item.style.opacity = '0'; // Keep invisible but measurable
-            }
-            
-            // Get current position
+            // Store original positions before any changes
             const rect = item.getBoundingClientRect();
-            const key = item.getAttribute('data-index');
-            currentPositions[key] = {
-                left: rect.left,
-                top: rect.top,
-                wasHidden: wasHidden
-            };
+            item.dataset.originalLeft = rect.left;
+            item.dataset.originalTop = rect.top;
             
-            // Restore hidden state if needed
-            if (wasHidden) {
-                item.classList.add('hidden-item');
-                item.style.display = 'none';
-            }
-        });
-        
-        // STEP 2: Determine which items should be visible in new category
-        gridItems.forEach(item => {
             if (category === 'all' || item.getAttribute('data-category') === category) {
-                // This item will be visible
-                item.classList.remove('hidden-item');
-                item.style.display = '';
-                item.style.opacity = '1';
+                item.classList.add('will-show');
+                item.classList.remove('will-hide');
             } else {
-                // This item will be hidden after animation
                 item.classList.add('will-hide');
-                // But keep it visible during calculation
-                item.classList.remove('hidden-item');
-                item.style.display = '';
-                item.style.opacity = '1';
+                item.classList.remove('will-show');
             }
         });
         
-        // Disable transitions for initial positioning
+        // STEP 2: Make all items that should be visible actually visible
+        gridItems.forEach(item => {
+            if (item.classList.contains('will-show')) {
+                if (item.classList.contains('hidden-item')) {
+                    item.classList.remove('hidden-item');
+                    item.style.display = '';
+                    // Initially invisible if it was hidden
+                    item.style.opacity = '0';
+                }
+            }
+        });
+        
+        // STEP 3: Disable transitions and update layout
         videoGrid.classList.add('no-transition');
-        
-        // Force reflow
-        void videoGrid.offsetWidth;
-        
-        // STEP 3: Recalculate layout with Masonry
         if (msnry) {
             msnry.options.transitionDuration = 0;
             msnry.layout();
         }
         
-        // Force reflow
+        // Force reflow to ensure layout is updated
         void videoGrid.offsetWidth;
         
-        // STEP 4: Capture new positions
-        const newPositions = {};
+        // STEP 4: Calculate transforms directly from original positions to final positions
         gridItems.forEach(item => {
-            const rect = item.getBoundingClientRect();
-            const key = item.getAttribute('data-index');
-            newPositions[key] = {
-                left: rect.left,
-                top: rect.top
-            };
-        });
-        
-        // STEP 5: Apply FLIP animation technique
-        gridItems.forEach(item => {
-            const key = item.getAttribute('data-index');
-            const currentPos = currentPositions[key];
-            const newPos = newPositions[key];
-            
-            // Apply transform to create illusion items are still in old position
-            if (currentPos && newPos) {
-                const deltaX = currentPos.left - newPos.left;
-                const deltaY = currentPos.top - newPos.top;
+            if (!item.classList.contains('hidden-item')) {
+                const originalLeft = parseFloat(item.dataset.originalLeft);
+                const originalTop = parseFloat(item.dataset.originalTop);
                 
-                // If item was previously hidden, position it at its final position
-                // but make it invisible (will fade in during animation)
-                if (currentPos.wasHidden) {
-                    item.style.transform = 'translate(0, 0)';
-                    item.style.opacity = '0';
+                const rect = item.getBoundingClientRect();
+                const currentLeft = rect.left;
+                const currentTop = rect.top;
+                
+                // Direct path calculation - from original to final position
+                const dx = originalLeft - currentLeft;
+                const dy = originalTop - currentTop;
+                
+                if (item.classList.contains('will-show') && !item.style.opacity) {
+                    // New items should start at final position
+                    item.style.transform = '';
                 } else {
-                    // Apply transform to offset new position
-                    item.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-                    item.style.opacity = '1';
+                    // Position items at their original position
+                    item.style.transform = `translate(${dx}px, ${dy}px)`;
                 }
-                
-                // Items that are moving get higher z-index
-                item.style.zIndex = '2';
             }
         });
         
-        // Force reflow
+        // Force reflow to ensure transforms are applied
         void videoGrid.offsetWidth;
         
-        // STEP 6: Start animation
+        // STEP 5: Enable transitions and animate to final positions in a straight line
         videoGrid.classList.remove('no-transition');
         
-        // Animate to final positions
+        // Set all items to animate directly to their final positions
         gridItems.forEach(item => {
-            const key = item.getAttribute('data-index');
-            const currentPos = currentPositions[key];
-            
-            // Animate all items to their final position with transform
-            item.style.transform = 'translate(0, 0)';
-            
-            // If item was previously hidden, fade it in
-            if (currentPos.wasHidden && !item.classList.contains('will-hide')) {
+            if (item.classList.contains('will-show')) {
                 item.style.opacity = '1';
-            }
-            
-            // If item will be hidden, fade it out
-            if (item.classList.contains('will-hide')) {
+                item.style.transform = 'translate(0, 0)'; // Direct path to final position
+            } else if (item.classList.contains('will-hide')) {
                 item.style.opacity = '0';
+                item.style.transform = 'translate(0, 0)'; // Fade out in place
             }
         });
         
-        // STEP 7: Clean up after animation
+        // Clean up after animation completes
         setTimeout(() => {
-            if (msnry) {
-                msnry.options.transitionDuration = '0.4s';
-            }
-            
-            // Hide items that should be hidden
+            // Final cleanup
             gridItems.forEach(item => {
-                if (item.classList.contains('will-hide')) {
+                // Remove temporary classes and data attributes
+                item.classList.remove('will-show');
+                item.classList.remove('will-hide');
+                delete item.dataset.originalLeft;
+                delete item.dataset.originalTop;
+                
+                // Hide items that should be hidden
+                if (category !== 'all' && item.getAttribute('data-category') !== category) {
                     item.classList.add('hidden-item');
                     item.style.display = 'none';
-                    item.classList.remove('will-hide');
                 }
                 
-                // Reset styles
+                // Reset all applied styles
                 item.style.transform = '';
-                item.style.zIndex = '';
+                item.style.opacity = '';
             });
             
-            // Update layout one final time
+            // Re-enable masonry transitions for future updates
             if (msnry) {
+                msnry.options.transitionDuration = '1.2s';
                 msnry.layout();
             }
             
             // Re-enable interaction
             videoGrid.classList.remove('filtering');
-        }, transitionDuration);
+            console.log('Animation complete');
+        }, transitionDuration + 100);
     }
     
     // Configure all videos
@@ -325,137 +300,189 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    /**
-     * Setup hover effects for grid items
-     */
-    function setupHoverEffects() {
-        gridItems.forEach(item => {
-            const gridInner = item.querySelector('.grid-item-inner');
+    // Set up modal and grid item functionality
+    setupGridItemsAndModal();
+    
+    function setupGridItemsAndModal() {
+        const videoModal = document.querySelector('.video-modal');
+        const modalContent = videoModal?.querySelector('.modal-content');
+        const modalVideo = document.querySelector('.modal-video');
+        const closeModal = document.querySelector('.close-modal');
+        
+        // 1. Handle IMAGE grid items - should navigate to gallery page
+        document.querySelectorAll('.grid-item a.grid-item-inner').forEach(item => {
+            // For image links, we need to ensure they navigate properly
             const overlay = item.querySelector('.grid-item-overlay');
-            const media = item.querySelector('img, video');
+            const media = item.querySelector('img');
             
-            if (gridInner && overlay) {
+            if (overlay && media) {
                 overlay.classList.add('bottom-title');
                 
-                gridInner.addEventListener('mouseenter', function() {
+                // Hover effect - show overlay and fade image
+                item.addEventListener('mouseenter', function() {
                     overlay.style.transform = 'translateY(0)';
-                    if (media) {
-                        media.style.transform = 'scale(1.03)';
-                    }
+                    media.style.opacity = '0.1'; // Make image almost transparent
+                    media.style.transform = 'scale(1.03)';
                 });
                 
-                gridInner.addEventListener('mouseleave', function() {
+                item.addEventListener('mouseleave', function() {
                     overlay.style.transform = 'translateY(100%)';
-                    if (media) {
-                        media.style.transform = 'scale(1)';
-                    }
+                    media.style.opacity = '1'; // Restore opacity
+                    media.style.transform = 'scale(1)';
+                });
+                
+                // Ensure link navigation works by blocking event propagation to grid filtering
+                item.addEventListener('click', function(e) {
+                    // Don't stop propagation or prevent default - let the link work naturally
+                    e.stopPropagation(); // This prevents the click from bubbling to parent grid items
                 });
             }
         });
-    }
-    
-    // Enhanced Modal functionality
-    const videoModal = document.querySelector('.video-modal');
-    const modalContent = videoModal?.querySelector('.modal-content');
-    const modalVideo = document.querySelector('.modal-video');
-    const closeModal = document.querySelector('.close-modal');
-    
-    // Add click event to all video grid items
-    document.querySelectorAll('.grid-item-inner[data-video-src]').forEach(item => {
-        item.addEventListener('click', function() {
-            const videoSrc = this.getAttribute('data-video-src');
+        
+        // 2. Handle VIDEO grid items - should open modal and play video
+        document.querySelectorAll('.grid-item-inner[data-video-src]').forEach(item => {
+            const overlay = item.querySelector('.grid-item-overlay');
+            const media = item.querySelector('video');
             
-            if (videoSrc && modalVideo) {
-                // Set the video source
-                const videoSource = modalVideo.querySelector('source') || document.createElement('source');
-                videoSource.setAttribute('src', videoSrc);
-                videoSource.setAttribute('type', 'video/mp4');
+            // Add hover effects - show overlay and fade video
+            if (overlay && media) {
+                overlay.classList.add('bottom-title');
                 
-                if (!modalVideo.querySelector('source')) {
-                    modalVideo.appendChild(videoSource);
-                }
+                item.addEventListener('mouseenter', function() {
+                    overlay.style.transform = 'translateY(0)';
+                    media.style.opacity = '0.1'; // Make video almost transparent
+                    media.style.transform = 'scale(1.03)';
+                });
                 
-                modalVideo.load();
-                
-                // Show modal
-                videoModal.style.display = 'flex';
-                
-                // Force reflow for smooth animation
-                void videoModal.offsetWidth;
-                
-                // Fade in effect
-                videoModal.style.opacity = '1';
-                videoModal.classList.add('active');
-                
-                if (modalContent) {
-                    modalContent.style.transform = 'translateY(0)';
-                }
-                
-                // Play the video after modal animation
-                setTimeout(() => {
-                    modalVideo.play().catch(e => {
-                        console.log('Modal video play error:', e);
-                    });
-                }, 300);
+                item.addEventListener('mouseleave', function() {
+                    overlay.style.transform = 'translateY(100%)';
+                    media.style.opacity = '1'; // Restore opacity
+                    media.style.transform = 'scale(1)';
+                });
             }
+            
+            // Add click handler for modal opening
+            item.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent any default navigation
+                e.stopPropagation(); // Stop event bubbling
+                
+                const videoSrc = this.getAttribute('data-video-src');
+                
+                if (videoSrc && modalVideo && videoModal) {
+                    // Set the video source - ensure we have a source element
+                    let videoSource = modalVideo.querySelector('source');
+                    if (!videoSource) {
+                        videoSource = document.createElement('source');
+                        modalVideo.appendChild(videoSource);
+                    }
+                    
+                    videoSource.setAttribute('src', videoSrc);
+                    videoSource.setAttribute('type', 'video/mp4');
+                    
+                    // Reset and reload the video
+                    modalVideo.load();
+                    
+                    // Show modal
+                    videoModal.style.display = 'flex';
+                    
+                    // Force reflow for smooth animation
+                    void videoModal.offsetWidth;
+                    
+                    // Fade in effect
+                    videoModal.style.opacity = '1';
+                    videoModal.classList.add('active');
+                    
+                    if (modalContent) {
+                        modalContent.style.transform = 'translateY(0)';
+                    }
+                    
+                    // Play the video after modal animation - ENSURE IT PLAYS
+                    setTimeout(() => {
+                        // Make sure controls are enabled in modal
+                        modalVideo.controls = true;
+                        
+                        modalVideo.play().then(() => {
+                            console.log('Modal video playing successfully');
+                        }).catch(e => {
+                            console.error('Modal video play error:', e);
+                            // Try again after a brief delay
+                            setTimeout(() => {
+                                modalVideo.play().catch(e2 => {
+                                    console.error('Second attempt failed:', e2);
+                                });
+                            }, 200);
+                        });
+                    }, 500);
+                }
+            });
         });
-    });
-    
-    // Close modal functions
-    if (closeModal) {
-        closeModal.addEventListener('click', function(e) {
-            e.preventDefault();
-            closeVideoModal();
-        });
-    }
-    
-    if (videoModal) {
-        videoModal.addEventListener('click', function(e) {
-            if (e.target === videoModal) {
+        
+        // Handle modal closing
+        if (closeModal) {
+            closeModal.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeVideoModal();
+            });
+        }
+        
+        if (videoModal) {
+            videoModal.addEventListener('click', function(e) {
+                if (e.target === videoModal) {
+                    closeVideoModal();
+                }
+            });
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && videoModal && videoModal.style.opacity === '1') {
                 closeVideoModal();
             }
         });
-    }
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && videoModal && videoModal.style.opacity === '1') {
-            closeVideoModal();
+        
+        function closeVideoModal() {
+            if (!videoModal) return;
+            
+            if (modalVideo) {
+                modalVideo.pause();
+            }
+            
+            videoModal.style.opacity = '0';
+            videoModal.classList.remove('active');
+            
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(20px)';
+            }
+            
+            setTimeout(() => {
+                videoModal.style.display = 'none';
+                
+                // Clear the video source to fully stop it
+                if (modalVideo) {
+                    const videoSource = modalVideo.querySelector('source');
+                    if (videoSource) {
+                        videoSource.removeAttribute('src');
+                        modalVideo.load();
+                    }
+                }
+            }, 800);
         }
-    });
-    
-    function closeVideoModal() {
-        if (!videoModal) return;
-        
-        if (modalVideo) {
-            modalVideo.pause();
-        }
-        
-        videoModal.style.opacity = '0';
-        videoModal.classList.remove('active');
-        
-        if (modalContent) {
-            modalContent.style.transform = 'translateY(20px)';
-        }
-        
-        setTimeout(() => {
-            videoModal.style.display = 'none';
-        }, 500);
     }
     
     // Add required CSS
     addRequiredCSS();
     
     function addRequiredCSS() {
-        if (!document.querySelector('#smooth-slide-styles')) {
+        if (!document.querySelector('#fixed-slide-styles')) {
             const style = document.createElement('style');
-            style.id = 'smooth-slide-styles';
+            style.id = 'fixed-slide-styles';
             style.textContent = `
-                /* Smooth sliding styles */
+                /* Core transition styles */
                 .grid-item {
                     transform: translate(0, 0);
-                    transition: transform ${transitionDuration/1000}s cubic-bezier(0.25, 0.1, 0.25, 1), 
-                                opacity ${transitionDuration/1000}s cubic-bezier(0.25, 0.1, 0.25, 1);
+                    transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+                                opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
                     will-change: transform, opacity;
+                    backface-visibility: hidden;
                 }
                 
                 .video-grid.no-transition * {
@@ -466,29 +493,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     pointer-events: none;
                 }
                 
+                /* Helper classes */
+                .will-show, .will-hide {
+                    /* Used for transition marking */
+                }
+                
                 /* Modal transitions */
                 .video-modal {
                     opacity: 0;
-                    transition: opacity 0.5s ease;
+                    transition: opacity 0.8s ease;
                 }
                 
                 .video-modal .modal-content {
                     transform: translateY(20px);
-                    transition: transform 0.5s ease;
+                    transition: transform 0.8s ease;
                 }
                 
                 .video-modal.active .modal-content {
                     transform: translateY(0);
                 }
                 
-                /* FLIP Animation Support */
-                .grid-item.moving {
-                    z-index: 2;
+                /* Fix video modal controls */
+                .modal-video::-webkit-media-controls {
+                    display: inline !important;
                 }
                 
-                /* Additional helper class */
-                .will-hide {
-                    /* Used for items that will be hidden after animation */
+                /* Adjust spacing between header and grid */
+                .video-grid-section {
+                    padding-top: 5px; /* Further reduced from 40px */
+                    padding-bottom: 100px;
+                    scroll-margin-top: 10px; /* Further reduced from 40px */
                 }
             `;
             document.head.appendChild(style);
@@ -801,38 +835,207 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// cursor change 
+// cursor change and header animation
 document.addEventListener('DOMContentLoaded', function() {
+    // Get the logo element
+    const logo = document.querySelector('.logo');
+    const logoImg = document.querySelector('.logo-img');
+    const mainNav = document.querySelector('.main-nav');
+    const headerInner = document.querySelector('.header-inner');
+    
+    // Variables to track scroll position, rotation and position
+    let lastScrollY = 0;
+    let originalLogoPosition = null;
+    let animationFrameId = null;
+    
+    // Animation state variables
+    let currentRotation = 0;
+    let targetRotation = 0;
+    let currentLeft = 0;
+    let targetLeft = 0;
+    
+    // Save original logo position once DOM is loaded
+    if (logo) {
+        const rect = logo.getBoundingClientRect();
+        originalLogoPosition = {
+            left: rect.left,
+            top: rect.top
+        };
+        currentLeft = rect.left;
+    }
+    
+    // Create a wrapper for the logo to handle the rotation
+    const logoWrapper = document.createElement('div');
+    logoWrapper.className = 'logo-wrapper';
+    
+    // Move the logo img inside the wrapper
+    if (logo && logoImg) {
+        logo.insertBefore(logoWrapper, logoImg);
+        logoWrapper.appendChild(logoImg);
+    }
+    
+    // Clone logo image for cursor
+    const cursorLogoImg = logoImg.cloneNode(true);
+    
+    // Function to handle scroll
+    function handleScroll() {
+        const currentScrollY = window.scrollY;
+        const header = document.querySelector('header');
+        const headerRect = header.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        
+        // MODIFIED: Always calculate logo position proportionally to scroll
+        // Use a much longer scroll distance to control the movement (1500px instead of 150px)
+        const scrollProgress = Math.min(currentScrollY / 1500, 1); // Normalize between 0 and 1
+            
+        // Calculate target rotation based on scroll progress (more gradual)
+        const maxRotation = 360; // Max rotation in degrees
+        targetRotation = scrollProgress * maxRotation;
+            
+        // Calculate target position based on scroll progress
+        const startLeft = originalLogoPosition ? originalLogoPosition.left : 0;
+        const endLeft = windowWidth * 0.75; // Target right position at 75% of window width
+        targetLeft = startLeft + (scrollProgress * (endLeft - startLeft));
+        
+        // Add scrolled class to header when scrolling down
+        if (currentScrollY > 50) {
+            header.classList.add('scrolled');
+            
+            // Move logo to right side gradually with scroll
+            logo.classList.add('logo-scrolled');
+            
+            // Adjust the header layout for scrolled state
+            header.classList.add('layout-changed');
+            
+            // Start the animation if it's not already running
+            if (!animationFrameId) {
+                animateLogoMovement();
+            }
+            
+            // Adjust main nav position
+            if (mainNav) {
+                mainNav.style.marginTop = '40px'; // Create space below the logo
+            }
+            
+        } else {
+            // At top of page - reset everything
+            header.classList.remove('scrolled');
+            header.classList.remove('layout-changed');
+            logo.classList.remove('logo-scrolled');
+            
+            // Set targets to original values
+            targetRotation = 0;
+            targetLeft = originalLogoPosition ? originalLogoPosition.left : 0;
+            
+            // Start animation if not already running
+            if (!animationFrameId) {
+                animateLogoMovement();
+            }
+            
+            // Reset main nav position
+            if (mainNav) {
+                mainNav.style.marginTop = '';
+            }
+        }
+        
+        lastScrollY = currentScrollY;
+    }
+    
+    // Function to smoothly animate both rotation and position
+    function animateLogoMovement() {
+        // MODIFIED: Further reduced easing values for even slower, smoother movement
+        const rotationEase = 0.008; // Very slow rotation speed
+        const positionEase = 0.008; // Very slow position speed
+        
+        const dr = targetRotation - currentRotation;
+        const dx = targetLeft - currentLeft;
+        
+        // If we're close enough to both targets, stop the animation
+        if (Math.abs(dr) < 0.5 && Math.abs(dx) < 0.5) {
+            currentRotation = targetRotation;
+            currentLeft = targetLeft;
+            
+            logoWrapper.style.transform = `rotate(${currentRotation}deg)`;
+            logo.style.left = `${currentLeft}px`;
+            
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+            return;
+        }
+        
+        // Update rotation with easing
+        currentRotation += dr * rotationEase;
+        logoWrapper.style.transform = `rotate(${currentRotation}deg)`;
+        
+        // Update position with easing
+        currentLeft += dx * positionEase;
+        logo.style.left = `${currentLeft}px`;
+        
+        // Continue the animation
+        animationFrameId = requestAnimationFrame(animateLogoMovement);
+    }
+    
+    // Add scroll event listener
+    window.addEventListener('scroll', handleScroll);
+    
+    // Re-calculate original position on resize
+    window.addEventListener('resize', function() {
+        if (logo) {
+            const rect = logo.getBoundingClientRect();
+            
+            // Only update original position when at top
+            if (window.scrollY <= 50) {
+                originalLogoPosition = {
+                    left: rect.left,
+                    top: rect.top
+                };
+                currentLeft = rect.left;
+            }
+            
+            // Recalculate target position based on new window size
+            handleScroll();
+        }
+    });
+    
+    // ---- Custom Cursor Implementation ----
+    
     // Create a custom cursor element
     const customCursor = document.createElement('div');
     customCursor.className = 'custom-cursor';
     document.body.appendChild(customCursor);
     
-    // Get all clickable elements
-    const clickableElements = document.querySelectorAll(
-        '.grid-item-inner, .social-link, ' +
-        '.play-button'
-    );
-    
-    // Add event listeners to show custom cursor on hover
-    clickableElements.forEach(element => {
-        // Force cursor: none !important to override any other styles
-        element.style.setProperty('cursor', 'none', 'important');
-        
-        element.addEventListener('mouseenter', () => {
-            customCursor.classList.add('active');
-        });
-        
-        element.addEventListener('mouseleave', () => {
-            customCursor.classList.remove('active');
-        });
-    });
+    // Add the logo to the cursor
+    customCursor.appendChild(cursorLogoImg);
     
     // Move the custom cursor with the mouse
     document.addEventListener('mousemove', (e) => {
         customCursor.style.left = e.clientX + 'px';
         customCursor.style.top = e.clientY + 'px';
     });
+    
+    // Show cursor only when hovering over the body, not on interactive elements
+    document.addEventListener('mouseover', (e) => {
+        // Check if we're hovering directly on the body or an empty area
+        // and not on any interactive elements
+        const isInteractiveElement = e.target.closest('a, button, .grid-item-inner, .social-link, .play-button, .nav-toggle, .close-nav, .main-nav, input, textarea, select, .modal');
+        
+        if (!isInteractiveElement && e.target.tagName !== 'HTML') {
+            customCursor.classList.add('active');
+            document.body.classList.add('custom-cursor-active');
+        } else {
+            customCursor.classList.remove('active');
+            document.body.classList.remove('custom-cursor-active');
+        }
+    });
+    
+    // Make sure to hide cursor when leaving the window
+    document.addEventListener('mouseleave', () => {
+        customCursor.classList.remove('active');
+        document.body.classList.remove('custom-cursor-active');
+    });
+    
+    // Run initial scroll check in case page loads already scrolled
+    handleScroll();
 });
 
 // About modal functionality
@@ -840,7 +1043,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get modal elements
     const aboutModal = document.getElementById('aboutModal');
     const aboutLinks = document.querySelectorAll('.about-link, a[href="/about"]');
-    const closeButtons = document.querySelectorAll('[data-bs-dismiss="modal"], .btn-close, .modal .btn-secondary');
+    const closeButtons = document.querySelectorAll('.btn-close, [data-bs-dismiss="modal"], .modal .btn-secondary');
     
     if (!aboutModal) {
         console.error('About modal not found in the document');
@@ -867,8 +1070,10 @@ document.addEventListener('DOMContentLoaded', function() {
         aboutModal.classList.add('show');
         
         // Make sure we close the navigation menu properly when opening the modal
-        if (isMobileView()) {
-            closeNavMenu();
+        if (typeof isMobileView === 'function' && isMobileView()) {
+            if (typeof closeNavMenu === 'function') {
+                closeNavMenu();
+            }
         }
     }
     
@@ -904,9 +1109,11 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             
             // Handle differently based on mobile vs desktop
-            if (isMobileView()) {
+            if (typeof isMobileView === 'function' && isMobileView()) {
                 // On mobile, close the mobile nav when opening About modal
-                closeNavMenu();
+                if (typeof closeNavMenu === 'function') {
+                    closeNavMenu();
+                }
             }
             
             // Always open the modal

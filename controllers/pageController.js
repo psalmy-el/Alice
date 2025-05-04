@@ -106,26 +106,17 @@ exports.getHomepage = async (req, res) => {
 exports.getAboutPage = (req, res) => {
   console.log('About page route accessed');
   
-  // Create the about content
-  const aboutContent = [
-    'Alice Engdahls',
-    'Producer at Rio Pictures',
-    'send me an email',
-    'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
-  ];
-  
-  // If it's an AJAX request, return just the modal content
+  // If it's an AJAX request, return just the modal status
   if (req.xhr || req.headers.accept.indexOf('json') > -1) {
     return res.json({ 
-      aboutText: aboutContent 
+      success: true
     });
   }
   
   // Otherwise, render the full about page (as fallback)
   res.render('about', {
-    title: 'About Us - Engdahls & Co Creative Studios',
-    logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg',
-    aboutText: aboutContent
+    title: 'About - Alice Engdahl',
+    logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg'
   });
 };
 

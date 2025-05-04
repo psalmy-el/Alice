@@ -56,7 +56,7 @@
                     <div class="grid-item" data-category="<%= item.category_id %>">
                         <% if(item.type === 'image') { %>
                             <!-- For images, link to the gallery page -->
-                            <a href="/gallery/<%= item.id %>" class="grid-item-inner">
+                            <a href="/gallery/<%= item.id %>" class="grid-item-inner image-link">
                                 <img src="<%= item.file_path %>" alt="<%= item.title %>">
                                 <div class="grid-item-overlay">
                                     <h3 class="grid-item-title"><%= item.title %></h3>
@@ -64,24 +64,16 @@
                                 </div>
                             </a>
                         <% } else if(item.type === 'video') { %>
+                            <!-- For videos, add data-video-src for modal trigger -->
                             <div class="grid-item-inner" data-video-src="<%= item.file_path %>">
                                 <% if (item.file_path) { %>
-                                    <% if(item.type === 'video') { %>
-                                        <% if (item.file_path) { %>
-                                            <video <% if (item.poster_image) { %>poster="<%= item.poster_image %>"<% } %>>
-                                                <source src="<%= item.file_path %>" type="video/mp4">
-                                                Your browser does not support the video tag.
-                                              </video>
-                                        <% } else { %>
-                                          <div class="media-placeholder">
-                                            <span>Media unavailable</span>
-                                          </div>
-                                        <% } %>
-                                      <% } %>
+                                    <video <% if (item.poster_image) { %>poster="<%= item.poster_image %>"<% } %>>
+                                        <source src="<%= item.file_path %>" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
                                 <% } else { %>
-                                    <!-- Handle broken item gracefully -->
-                                    <div class="broken-item">
-                                        <p>Media unavailable</p>
+                                    <div class="media-placeholder">
+                                        <span>Media unavailable</span>
                                     </div>
                                 <% } %>
                                 <div class="grid-item-overlay">
@@ -95,15 +87,16 @@
             </div>
         </div>
     </section>
-        <!-- And make sure the category dropdown has the correct data-category values -->
-        <ul class="dropdown-menu">
-            <li><a href="#" data-category="all">All</a></li>
-            <% categories.forEach(category => { %>
-            <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
-            <% }); %>
-        </ul>
 
-    <!-- Video Modal -->
+    <!-- Category Filter Menu -->
+    <ul class="dropdown-menu">
+        <li><a href="#" data-category="all">All</a></li>
+        <% categories.forEach(category => { %>
+        <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
+        <% }); %>
+    </ul>
+
+    <!-- Video Modal - with explicit controls enabled -->
     <div class="video-modal">
         <div class="modal-content">
             <button class="close-modal">&times;</button>
@@ -114,28 +107,30 @@
         </div>
     </div>
 
-    <!-- About Modal -->
+   <!-- About Modal -->
     <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="aboutModalLabel">Alice Engdahls & Co</h5>
-              
-            </div>
+            <h5 class="modal-title" id="aboutModalLabel">About</h5>
             <button type="button" class="btn-close" aria-label="Close"></button>
-            <div class="modal-body">
-              <% if (typeof aboutText !== 'undefined' && aboutText.length > 0) { %>
-                <% aboutText.forEach(paragraph => { %>
-                  <p><%= paragraph %></p>
-                <% }); %>
-              <% } else { %>
-                <p>Alice Engdahls</p>
-                <p>Producer at Rio Pictures</p>
-                <p>Send me an email</p>
-
-              <% } %>
             </div>
-          </div>
+            <div class="modal-body">
+                <p>Alice Engdahl</p>
+                <p>Producer at Rio Pictures</p>
+                <p class="mail">Send me an email:</p>
+                <p> <a href="mailto:alice@rio.pictures">alice@rio.pictures</a></p>
+            </div>
+            <div class="modal-footer">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-instagram">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                </a>
+            </div>
+        </div>
         </div>
     </div>
 
