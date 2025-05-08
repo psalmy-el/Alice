@@ -26,12 +26,17 @@
 
   a{
     text-decoration: none;
-    color: inherit;
-  }
-
-  a:hover{
     color: blue;
   }
+
+  .d-flex a:hover{
+    color: rgb(0, 0, 0);
+  }
+
+  p{
+    color: blue;
+  }
+
 @media (max-width: 994px){
   /* Hide the navbar toggler */
   .navbar-toggler {
@@ -74,16 +79,8 @@
     font-size: 1rem;
   }
   
-  h3 {
-    font-size: 1.5rem;
-  }
-  
-  h5 {
-    font-size: 1.1rem;
-  }
-  
   p {
-    font-size: 0.9rem;
+    font-size: 01rem;
   }
   
   .fa-2x {

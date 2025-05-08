@@ -975,127 +975,158 @@ grid-template-columns: 1fr;
 }
 
 @media (max-width: 768px) {
+    .logo img{
+        width: 110px;
+    }
+
     .video-grid {
         column-count: 1;
     }
     
-    .main-nav {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background-color: rgba(255, 255, 255, 0.98);
-        z-index: 100;
-        padding: 80px 20px 20px;
-        overflow-y: auto;
-    }
-
-    .main-nav.active {
-        display: block;
-    }
-
-    .main-nav ul {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .main-nav li {
-    margin: 15px 0;
-    width: 100%;
-    text-align: center;
-    box-shadow: none;
-    }
-
-    .main-nav a {
-    font-size: 18px;
-    display: block;
-    padding: 10px 0;
-    }
-
-    .nav-toggle {
-    display: block;
-    z-index: 101;
-    }
-
-    .close-nav {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 30px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: none;
-    }
-
-    .main-nav.active .close-nav {
-    display: block;
-    }
-
-    .vertical-categories-container {
-        display: none !important; /* Force hide on mobile */
-    }
+        /* Main navigation for mobile */
+        .main-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important; /* Force full width */
+            height: 100vh;
+            background-color: rgba(255, 255, 255, 0.98);
+            z-index: 100;
+            padding: 80px 20px 20px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            transform: translateX(0); /* Ensure it's not sliding in from left */
+        }
+        
+        /* Always ensure the menu is full width when active */
+        .main-nav.active {
+            display: block;
+            width: 100vw !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: translateX(0) !important;
+        }
+        
+        .main-nav ul {
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .main-nav li {
+            margin: 15px 0;
+            width: 100%;
+            text-align: center;
+            box-shadow: none;
+        }
+        
+        .main-nav a {
+            font-size: 18px;
+            display: block;
+            padding: 10px 0;
+        }
+        
+        .nav-toggle {
+            display: block;
+            z-index: 101;
+        }
+        
+        .close-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .main-nav.active .close-nav {
+            display: block;
+        }
+        
+        /* Hide Alice Engdahl link on mobile */
+        .main-nav .alice-engdahl-link,
+        a[href*="alice"],
+        a:contains("Alice Engdahl") {
+            display: none !important;
+        }
+        
+        /* Categories container */
+        .vertical-categories-container {
+            display: none !important; /* Force hide on mobile */
+        }
+        
+        /* Show categories in dropdown menu for mobile */
+        .mobile-categories-menu {
+            display: block;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .mobile-categories-menu .dropdown-toggle {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .mobile-categories-menu .dropdown-menu {
+            position: static !important;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            padding: 0;
+            margin: 0;
+            z-index: 500;
+        }
+        
+        .mobile-categories-menu .dropdown-menu li {
+            border-bottom: 1px solid #f0f0f0;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        .mobile-categories-menu .dropdown-menu li:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-categories-menu .dropdown-menu a {
+            display: block;
+            padding: 12px 15px !important;
+            text-align: center;
+            font-size: 16px !important;
+            color: #0066cc;
+        }
+        
+        .mobile-categories-menu .dropdown-menu a:active,
+        .mobile-categories-menu .dropdown-menu a.active {
+            background-color: #f0f0f0;
+            color: #003366;
+        }
+        
+        /* Hide original mobile dropdowns if they exist */
+        .dropdown.mobile-only {
+            display: none !important;
+        }
     
-    /* Show categories in dropdown menu for mobile */
-    .mobile-categories-menu {
-        display: block;
-        margin-top: 15px;
-        width: 100%;
-    }
-    
-    .mobile-categories-menu .dropdown-toggle {
-        display: block;
-        width: 100%;
-        text-align: center;
-        padding: 10px;
-        background-color: #f8f8f8;
-        border-radius: 4px;
-        margin-bottom: 5px;
-        position: relative;
-        cursor: pointer;
-    }
-    
-    .mobile-categories-menu .dropdown-menu {
-        position: static !important;
-        width: 100%;
-        background-color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        border-radius: 4px;
-        padding: 0;
-        margin: 0;
-        z-index: 500;
-    }
-    
-    .mobile-categories-menu .dropdown-menu li {
-        border-bottom: 1px solid #f0f0f0;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .mobile-categories-menu .dropdown-menu li:last-child {
-        border-bottom: none;
-    }
-    
-    .mobile-categories-menu .dropdown-menu a {
-        display: block;
-        padding: 12px 15px !important;
-        text-align: center;
-        font-size: 16px !important;
-        color: #0066cc;
-    }
-    
-    .mobile-categories-menu .dropdown-menu a:active,
-    .mobile-categories-menu .dropdown-menu a.active {
-        background-color: #f0f0f0;
-        color: #003366;
-    }
-    
-    /* Hide original mobile dropdowns if they exist */
-    .dropdown.mobile-only {
-        display: none !important;
-    }
+        /* Force any opened or active dropdown to maintain full width */
+        .dropdown.show,
+        .dropdown.open,
+        .dropdown-menu.show {
+            width: 100% !important;
+            left: 0 !important;
+            right: 0 !important;
+            position: static !important;
+        }
     
     /* Center images and videos */
     .video-grid {
@@ -1165,9 +1196,15 @@ grid-template-columns: 1fr;
 
     /* About modal adjustments */
     .modal-body {
-        padding: 1rem;
+        padding: 1.5rem !important;
     }
     
+    .btn-close {
+        top: 1rem !important;
+        right: 1rem !important;
+        left: auto !important;
+    }
+
     .modal-body p {
         font-size: 0.9rem;
         line-height: 1.5;
@@ -1175,19 +1212,42 @@ grid-template-columns: 1fr;
     }
     
     .modal-dialog {
-        margin-top: 10vh;
-
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
    
     .modal {
-        padding: 1vh;
-        width: 100vw;
+        padding: 0 !important;
+        margin: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: none !important;
+        max-height: none !important;
+    }
+
+    .modal-content {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
     }
          
     .modal-header, .modal-footer {
         padding: 1rem;
     }
-    
+
+    .close-modal{
+        top: 5px;
+    }
+
     /* Footer reorganization */
     .footer-container {
         display: grid;
