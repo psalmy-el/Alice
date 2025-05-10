@@ -40,7 +40,7 @@ exports.getHomepage = async (req, res) => {
     const companyInfo = {
       name: 'Engdahls & Co Creative Studios',
       description: 'Engdahls & Co Creative Studios is an innovative and versatile production company offering high-quality commercial films, beautiful pictures and video productions. We create engaging and visually striking stories that help our clients reach their target audiences through creative and tailored solutions.',
-      logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg',
+      logoPath: 'https://res.cloudinary.com/dawxl838a/image/upload/v1746860933/uploads/WhatsApp_Image_2025-03-30_at_19.48.20_926fb74f.jpg',
       introHeading: 'Movie Productions'
     };
 
