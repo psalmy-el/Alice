@@ -14,10 +14,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Multer config (in-memory storage)
-const storage = multer.memoryStorage();
+
 const upload = multer({ 
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 400 * 1024 * 1024 } // 400MB limit
 });
 
@@ -43,16 +42,12 @@ const uploadToCloudinary = (file) => {
 };
 
 // Route: POST /upload-media
-router.post('/upload-media', upload.fields([
-  { name: 'files', maxCount: 5 },
-  { name: 'posterImage', maxCount: 1 }
-]), async (req, res) => {
+router.post('/upload-media', upload.array('files', 10), async (req, res) => {
   try {
     console.log("Request body:", req.body);
     
     // Verify files are present
-    const files = req.files['files'] || [];
-    const posterImage = req.files['posterImage'] ? req.files['posterImage'][0] : null;
+    const files = req.files || [];
     
     console.log("Request files count:", files.length);
     
@@ -63,8 +58,7 @@ router.post('/upload-media', upload.fields([
       });
     }
 
-    // Instead of handling everything here, pass control to the controller
-    // which will handle both Cloudinary uploads and database operations
+    // Pass control to the controller
     return mediaController.uploadMedia(req, res);
     
   } catch (err) {

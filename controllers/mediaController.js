@@ -22,7 +22,7 @@ exports.uploadMedia = async (req, res) => {
   try {
     const { title, description, category_id } = req.body;
     const isIntro = req.body.is_intro === 'true';
-    
+   
     // Validate required fields
     if (!title || !description || !category_id) {
       return res.status(400).json({
@@ -30,34 +30,49 @@ exports.uploadMedia = async (req, res) => {
         message: `Please fill in all required fields: ${!title ? 'Title, ' : ''}${!description ? 'Description, ' : ''}${!category_id ? 'Category' : ''}`
       });
     }
-    
-    // Get files from the multer format
-    const files = req.files && req.files.files ? req.files.files : [];
-    const posterImage = req.files && req.files.posterImage ? req.files.posterImage[0] : null;
-    
+   
+    // Get files from the request
+    const files = req.files || [];
+   
     console.log('Received files:', files.length);
     console.log('Received form data:', req.body);
-    
+   
     if (files.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'No files uploaded'
       });
     }
-    
-    // Upload files to Cloudinary
+   
+    // Upload files to Cloudinary with resource_type based on file type
     const cloudinaryFiles = await Promise.all(files.map(file => {
       return new Promise((resolve, reject) => {
+        // Determine resource_type based on file mimetype
+        let resourceType = 'auto'; // Let Cloudinary auto-detect
+        
+        if (file.mimetype.startsWith('video/')) {
+          resourceType = 'video';
+        } else if (file.mimetype.startsWith('image/')) {
+          resourceType = 'image';
+        }
+        
+        console.log(`Uploading file as ${resourceType}: ${file.originalname} (${file.mimetype})`);
+       
         const stream = cloudinary.uploader.upload_stream(
-          { folder: 'uploads' },
+          {
+            folder: 'uploads',
+            resource_type: resourceType,
+          },
           (error, result) => {
             if (result) {
+              console.log(`Successfully uploaded to Cloudinary: ${file.originalname}`);
               resolve({
                 originalname: file.originalname,
                 url: result.secure_url,
                 public_id: result.public_id
               });
             } else {
+              console.error('Cloudinary upload error:', error);
               reject(error);
             }
           }
@@ -65,56 +80,32 @@ exports.uploadMedia = async (req, res) => {
         streamifier.createReadStream(file.buffer).pipe(stream);
       });
     }));
-    
-    // Upload poster image if it exists
-    let cloudinaryPosterImage = null;
-    if (posterImage) {
-      cloudinaryPosterImage = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: 'posters' },
-          (error, result) => {
-            if (result) {
-              resolve({
-                originalname: posterImage.originalname,
-                url: result.secure_url,
-                public_id: result.public_id
-              });
-            } else {
-              reject(error);
-            }
-          }
-        );
-        streamifier.createReadStream(posterImage.buffer).pipe(stream);
-      });
-    }
-    
+   
     // Determine the type from the first file
     const type = files[0].mimetype.startsWith('image/') ? 'image' : 'video';
-    
-    // Create the main media entry - adjust this according to your database model
+    console.log(`Setting media type as: ${type}`);
+   
+    // Create the main media entry
     const mediaId = await Media.create({
       title,
       description,
       type,
       category_id
     });
-    
-    // Add files to the media entry - adjust according to your model
+   
+    console.log(`Created media entry with ID: ${mediaId}`);
+   
+    // Add files to the media entry
     await Media.addFiles(mediaId, cloudinaryFiles.map(file => ({
       path: file.url,
       public_id: file.public_id
     })));
-    
-    // Add poster image if it exists and this is a video
-    if (cloudinaryPosterImage && type === 'video') {
-      await Media.addPosterImage(mediaId, cloudinaryPosterImage.url, cloudinaryPosterImage.public_id);
-    }
-    
+       
     // Set as intro video if requested and it's a video
     if (isIntro && type === 'video') {
       await Media.setAsIntroVideo(mediaId);
     }
-    
+   
     // Return success response
     res.json({
       success: true,
@@ -176,7 +167,6 @@ exports.updateMedia = async (req, res) => {
       category_id,
       replace_files,
       hasFiles: req.files && req.files.files ? req.files.files.length : 0,
-      hasPoster: req.files && req.files.posterImage ? true : false
     });
     
     // Validate required fields
@@ -214,7 +204,10 @@ exports.updateMedia = async (req, res) => {
       for (const publicId of filesToDelete) {
         try {
           console.log('Deleting file from Cloudinary:', publicId);
-          await cloudinary.uploader.destroy(publicId);
+          // Determine resource type based on file extension
+          const isVideo = existingMedia.type === 'video';
+          const resourceType = isVideo ? 'video' : 'image';
+          await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
         } catch (cloudinaryError) {
           console.error('Error deleting file from Cloudinary:', cloudinaryError);
           // Continue even if deletion fails
@@ -228,9 +221,16 @@ exports.updateMedia = async (req, res) => {
       const cloudinaryFiles = [];
       for (const file of req.files.files) {
         try {
+          // Determine resource type based on file mimetype
+          const resourceType = file.mimetype.startsWith('video/') ? 'video' : 'image';
+          console.log(`Uploading file as ${resourceType}: ${file.originalname}`);
+          
           const cloudinaryResult = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: 'uploads' },
+              { 
+                folder: 'uploads',
+                resource_type: resourceType // Specify resource type
+              },
               (error, result) => {
                 if (error) reject(error);
                 else resolve(result);
@@ -247,14 +247,14 @@ exports.updateMedia = async (req, res) => {
           console.error('Error uploading to Cloudinary:', uploadError);
           return res.status(500).json({ 
             success: false, 
-            message: 'Failed to upload file to Cloudinary' 
+            message: 'Failed to upload file to Cloudinary: ' + uploadError.message 
           });
         }
       }
       
       // Add new files to database
       console.log('Adding new files:', cloudinaryFiles.length);
-      await Media.addFiles(id, cloudinaryFiles.map(file => ({ path: file.path })));
+      await Media.addFiles(id, cloudinaryFiles);
       
       // If this is a video, determine media type
       if (req.files.files[0].mimetype.startsWith('video/')) {
@@ -264,49 +264,6 @@ exports.updateMedia = async (req, res) => {
       }
     }
     
-    // If a new poster image was uploaded, update it
-    if (req.files && req.files.posterImage && req.files.posterImage.length > 0) {
-      console.log('Processing new poster image');
-      
-      // If there's an existing poster, delete it first from Cloudinary
-      if (existingMedia.poster_image) {
-        try {
-          const urlParts = existingMedia.poster_image.split('/');
-          const filenameWithExtension = urlParts[urlParts.length - 1];
-          const publicId = 'uploads/' + filenameWithExtension.split('.')[0];
-          
-          console.log('Deleting old poster from Cloudinary:', publicId);
-          await cloudinary.uploader.destroy(publicId);
-        } catch (cloudinaryError) {
-          console.error('Error deleting poster from Cloudinary:', cloudinaryError);
-          // Continue even if deletion fails
-        }
-      }
-      
-      // Upload new poster to Cloudinary
-      try {
-        const posterImage = req.files.posterImage[0];
-        const cloudinaryResult = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'uploads' },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          streamifier.createReadStream(posterImage.buffer).pipe(uploadStream);
-        });
-        
-        await Media.addPosterImage(id, cloudinaryResult.secure_url);
-      } catch (uploadError) {
-        console.error('Error uploading poster to Cloudinary:', uploadError);
-        return res.status(500).json({ 
-          success: false, 
-          message: 'Failed to upload poster image to Cloudinary' 
-        });
-      }
-    }
-
     res.json({
       success: true,
       message: 'Media updated successfully'
@@ -318,7 +275,7 @@ exports.updateMedia = async (req, res) => {
       message: 'Failed to update media: ' + error.message 
     });
   }
-};;
+};
 
 // Get all files for a specific media
 exports.getMediaFiles = async (req, res) => {
@@ -346,6 +303,28 @@ exports.getMediaFiles = async (req, res) => {
   }
 };
 
+// Helper function to extract public_id from Cloudinary URL
+const getPublicIdFromUrl = (url) => {
+  if (!url) return null;
+  
+  try {
+    // Extract the public ID from Cloudinary URL
+    // Example URL: https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/uploads/abcdef123456
+    // We need to extract: uploads/abcdef123456
+    const parts = url.split('/');
+    const uploadIndex = parts.findIndex(part => part === 'upload');
+    
+    if (uploadIndex !== -1 && parts.length > uploadIndex + 2) {
+      // Join all parts after 'upload' to get the full public_id including folder
+      return parts.slice(uploadIndex + 2).join('/');
+    }
+    return null;
+  } catch (error) {
+    console.error('Error extracting public_id:', error);
+    return null;
+  }
+};
+
 // Delete media
 exports.deleteMedia = async (req, res) => {
   try {
@@ -357,16 +336,25 @@ exports.deleteMedia = async (req, res) => {
         message: 'Media not found'
       });
     }
-
-    // Delete files from filesystem
-    for (const filePath of filePaths) {
-      try {
-        await fs.unlink(path.join(__dirname, '../public', filePath));
-      } catch (fileError) {
-        console.error('Error deleting file:', fileError, filePath);
-        // Continue even if file deletion fails
+    
+    // Delete files from Cloudinary
+    const deletePromises = filePaths.map(filePath => {
+      const publicId = getPublicIdFromUrl(filePath);
+      if (publicId) {
+        return new Promise((resolve) => {
+          cloudinary.uploader.destroy(publicId, (error, result) => {
+            if (error) {
+              console.error('Error deleting from Cloudinary:', error);
+            }
+            resolve();
+          });
+        });
       }
-    }
+      return Promise.resolve();
+    });
+    
+    // Wait for all Cloudinary deletions to complete
+    await Promise.all(deletePromises);
     
     res.json({
       success: true,
@@ -374,9 +362,9 @@ exports.deleteMedia = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting media:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to delete media: ' + error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete media: ' + error.message
     });
   }
 };
@@ -392,13 +380,18 @@ exports.deleteFile = async (req, res) => {
         message: 'File not found'
       });
     }
-
-    // Delete the file from filesystem
-    try {
-      await fs.unlink(path.join(__dirname, '../public', filePath));
-    } catch (fileError) {
-      console.error('Error deleting file from filesystem:', fileError);
-      // Continue even if file deletion fails
+    
+    // Delete the file from Cloudinary
+    const publicId = getPublicIdFromUrl(filePath);
+    if (publicId) {
+      await new Promise((resolve, reject) => {
+        cloudinary.uploader.destroy(publicId, (error, result) => {
+          if (error) {
+            console.error('Error deleting from Cloudinary:', error);
+          }
+          resolve();
+        });
+      });
     }
     
     res.json({
@@ -407,9 +400,9 @@ exports.deleteFile = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting file:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to delete file: ' + error.message 
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete file: ' + error.message
     });
   }
 };

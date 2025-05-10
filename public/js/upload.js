@@ -2,9 +2,6 @@ const uploadArea = document.getElementById('uploadArea');
 const mediaFilesInput = document.getElementById('mediaFiles');
 const previewsContainer = document.getElementById('previews');
 const uploadForm = document.getElementById('uploadForm');
-const posterImageGroup = document.getElementById('posterImageGroup');
-const posterImageInput = document.getElementById('posterImage');
-const posterPreviewContainer = document.getElementById('posterPreview');
 const removeAllBtn = document.createElement('button');
 
 removeAllBtn.className = 'btn btn-outline-danger mb-3 mt-2';
@@ -44,20 +41,16 @@ document.body.appendChild(uploadPopupContainer);
 
 // Track files 
 let files = [];
-let posterFile = null;
 
 // Handle click on upload area
 uploadArea.addEventListener('click', () => {
   mediaFilesInput.click();
 });
 
-// Show poster image field only when video is selected
+// Show intro checkbox field only when video is selected
 function updateFormForFileTypes() {
   const hasVideo = files.some(file => file.type.startsWith('video/'));
-  
-  // Show/hide poster image field when video is selected
-  posterImageGroup.style.display = hasVideo ? 'block' : 'none';
-  
+   
   // Show/hide intro video checkbox when video is selected
   const introCheckboxGroup = document.getElementById('introCheckboxGroup');
   introCheckboxGroup.style.display = hasVideo ? 'block' : 'none';
@@ -246,67 +239,6 @@ progressBar.setAttribute('aria-valuemax', '100');
 progressContainer.appendChild(progressBar);
 previewsContainer.after(progressContainer);
 
-// Handle poster image selection
-posterImageInput.addEventListener('change', (e) => {
-  if (e.target.files.length) {
-    posterFile = e.target.files[0];
-    displayPosterPreview(posterFile);
-  }
-});
-
-// Setup poster image drag and drop
-const posterUploadArea = document.querySelector('.poster-upload-area');
-posterUploadArea.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  posterUploadArea.style.borderColor = '#007bff';
-});
-
-posterUploadArea.addEventListener('dragleave', () => {
-  posterUploadArea.style.borderColor = '#ccc';
-});
-
-// Handle click on poster upload area
-posterUploadArea.addEventListener('click', () => {
-  posterImageInput.click();
-});
-
-posterUploadArea.addEventListener('drop', (e) => {
-  e.preventDefault();
-  posterUploadArea.style.borderColor = '#ccc';
-  if (e.dataTransfer.files.length) {
-    posterFile = e.dataTransfer.files[0];
-    displayPosterPreview(posterFile);
-  }
-});
-
-function displayPosterPreview(file) {
-  const reader = new FileReader();
-  posterPreviewContainer.innerHTML = '';
-  
-  reader.onload = function(event) {
-    const previewItem = document.createElement('div');
-    previewItem.className = 'preview-item';
-    
-    const img = document.createElement('img');
-    img.src = event.target.result;
-    previewItem.appendChild(img);
-    
-    // Add remove button
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-preview';
-    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-    removeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      posterFile = null;
-      posterPreviewContainer.innerHTML = '';
-    });
-    previewItem.appendChild(removeBtn);
-    
-    posterPreviewContainer.appendChild(previewItem);
-  };
-  
-  reader.readAsDataURL(file);
-}
 
 // Create preview for a file
 function createPreview(file, index) {
@@ -408,9 +340,6 @@ function resetForm() {
   uploadForm.reset();
   files = [];
   previewsContainer.innerHTML = '';
-  posterPreviewContainer.innerHTML = '';
-  posterFile = null;
-  posterImageGroup.style.display = 'none';
   removeAllBtn.style.display = 'none';
 }
 
@@ -445,15 +374,9 @@ uploadForm.addEventListener('submit', function(e) {
   files.forEach((file) => {
     formData.append('files', file);
   });
-  
-  // Add poster image if it exists and a video is being uploaded
-  if (posterFile && files.some(file => file.type.startsWith('video/'))) {
-    formData.append('posterImage', posterFile);
-  }
-  
+   
   // Log what we're sending
   console.log('Submitting form with files:', files.length);
-  console.log('Poster file:', posterFile ? posterFile.name : 'None');
   
   // Show regular progress bar and popup
   progressContainer.style.display = 'block';
@@ -560,6 +483,4 @@ uploadForm.addEventListener('submit', function(e) {
   
   console.log('Request sent to server');
 });
-  
-
   

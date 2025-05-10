@@ -71,27 +71,6 @@
             </div>
             
             <div id="newFilePreviews" class="mb-3"></div>
-
-            <!-- Poster Image Section (for videos only) -->
-            <div id="posterImageGroup" class="mb-4" style="<%= media.type === 'video' ? 'display: block;' : 'display: none;' %>">
-              <h5 class="mb-3">Video Poster Image</h5>
-              <div class="poster-upload-area">
-                <i class="fas fa-image fa-2x mb-2"></i>
-                <p>Drop a poster image here or click to select</p>
-                <input type="file" id="posterImage" name="posterImage" accept="image/*" style="display: none;">
-              </div>
-              <small class="text-muted">This image will be shown before the video plays</small>
-              <div id="posterPreview" class="mt-2">
-                <% if (media.poster_image) { %>
-                <div class="preview-item">
-                  <img src="<%= media.poster_image %>" alt="Poster Image">
-                  <button type="button" class="remove-preview poster-remove-btn">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <% } %>
-              </div>
-            </div>
             
             <form id="editForm">
               <div class="mb-3">

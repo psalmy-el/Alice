@@ -10,14 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const mediaFilesInput = document.getElementById('mediaFiles');
   const newFilePreviewsContainer = document.getElementById('newFilePreviews');
   const editForm = document.getElementById('editForm');
-  const posterImageGroup = document.getElementById('posterImageGroup');
-  const posterImageInput = document.getElementById('posterImage');
-  const posterPreviewContainer = document.getElementById('posterPreview');
-  const posterUploadArea = document.querySelector('.poster-upload-area');
   
   // Track new files 
   let newFiles = [];
-  let posterFile = null;
   
   // Create and add progress bars
   const fileLoadingProgressContainer = document.createElement('div');
@@ -68,77 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   `;
   document.body.appendChild(uploadPopupContainer);
-  
-  // Show poster image section if this is a video
-  if (document.querySelector('video') || newFiles.some(file => file.type.startsWith('video/'))) {
-    if (posterImageGroup) {
-      posterImageGroup.style.display = 'block';
-    }
-  }
-  
-  // Setup poster drag and drop
-  if (posterUploadArea) {
-    posterUploadArea.addEventListener('click', () => {
-      posterImageInput.click();
-    });
-    
-    // Handle poster image selection
-    posterImageInput.addEventListener('change', (e) => {
-      if (e.target.files.length) {
-        posterFile = e.target.files[0];
-        displayPosterPreview(posterFile);
-      }
-    });
-    
-    // Setup poster image drag and drop
-    posterUploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      posterUploadArea.style.borderColor = '#007bff';
-    });
-    
-    posterUploadArea.addEventListener('dragleave', () => {
-      posterUploadArea.style.borderColor = '#ccc';
-    });
-    
-    posterUploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      posterUploadArea.style.borderColor = '#ccc';
-      if (e.dataTransfer.files.length) {
-        posterFile = e.dataTransfer.files[0];
-        displayPosterPreview(posterFile);
-      }
-    });
-  }
-  
-  function displayPosterPreview(file) {
-    const reader = new FileReader();
-    posterPreviewContainer.innerHTML = '';
-    
-    reader.onload = function(event) {
-      const previewItem = document.createElement('div');
-      previewItem.className = 'preview-item';
-      
-      const img = document.createElement('img');
-      img.src = event.target.result;
-      previewItem.appendChild(img);
-      
-      // Add remove button
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-preview';
-      removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        posterFile = null;
-        posterPreviewContainer.innerHTML = '';
-      });
-      previewItem.appendChild(removeBtn);
-      
-      posterPreviewContainer.appendChild(previewItem);
-    };
-    
-    reader.readAsDataURL(file);
-  }
-  
+   
   // Handle form submission to properly replace files
   if (editForm) {
     editForm.addEventListener('submit', function(originalSubmitEvent) {
@@ -156,12 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
           formData.append('files', file);
         });
       }
-      
-      // Add poster image if it exists
-      if (posterFile) {
-        formData.append('posterImage', posterFile);
-      }
-      
+            
       // Show regular progress bar
       progressContainer.style.display = 'block';
       progressBar.style.width = '0%';
@@ -291,11 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
         newFiles.push(filesList[i]);
         newVideoCount++;
         hasAddedVideo = true;
-        
-        // Show poster section as we have a video
-        if (posterImageGroup) {
-          posterImageGroup.style.display = 'block';
-        }
       }
     }
     
@@ -410,13 +325,6 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       });
-      
-      // Update poster image section visibility
-      if (!document.querySelector('video') && !newFiles.some(file => file.type.startsWith('video/'))) {
-        if (posterImageGroup) {
-          posterImageGroup.style.display = 'none';
-        }
-      }
     }
   }
   
