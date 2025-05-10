@@ -7,6 +7,8 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const flash = require('connect-flash');
 const mailer = require('./config/mailer');
+const bcrypt = require('bcrypt');
+const db = require('./config/database');
 
 require('dotenv').config();
 
@@ -55,6 +57,7 @@ app.use(session({
     secure: false
   }
 }));
+
 
 // Add this after your session middleware but before your routes
 app.get('/session-test', (req, res) => {

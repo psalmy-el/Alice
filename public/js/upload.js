@@ -414,108 +414,152 @@ function resetForm() {
   removeAllBtn.style.display = 'none';
 }
 
-  uploadForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Form validation
-    const title = document.getElementById('title').value;
-    const description = document.getElementById('description').value;
-    const category_id = document.getElementById('category_id').value;
-    
-    let missingFields = [];
-    if (!title) missingFields.push('Title');
-    if (!description) missingFields.push('Description');
-    if (!category_id || category_id === '-- Select Category --') missingFields.push('Category');
-    if (files.length === 0) missingFields.push('Media Files');
-    
-    if (missingFields.length > 0) {
-      showNotification(false, 'Missing Fields', 'Please fill in the following: ' + missingFields.join(', '));
-      return;
-    }
-    
-    const formData = new FormData();
-    
-    // Add form fields
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('category_id', category_id);
-    formData.append('is_intro', document.getElementById('is_intro').checked);
-    
-    // Add all files with the same field name
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-    
-    // Add poster image if it exists and a video is being uploaded
-    if (posterFile && files.some(file => file.type.startsWith('video/'))) {
-      formData.append('posterImage', posterFile);
-    }
-    
-    // Check if we're uploading a video
-    const hasVideo = files.some(file => file.type.startsWith('video/'));
-    
-    // Show regular progress bar and popup
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-    progressBar.textContent = '0%';
-    
-    // Show popup progress
-    uploadPopupContainer.style.display = 'flex';
-    const popupProgressBar = document.querySelector('.popup-progress-bar');
-    popupProgressBar.style.width = '0%';
-    popupProgressBar.textContent = '0%';
-    
-    // Submit using fetch API with progress tracking
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload', true);
-    
-    xhr.upload.onprogress = function(e) {
-      if (e.lengthComputable) {
-        const percentComplete = Math.round((e.loaded / e.total) * 100);
-        
-        // Update both progress bars
-        progressBar.style.width = percentComplete + '%';
-        progressBar.textContent = percentComplete + '%';
-        progressBar.setAttribute('aria-valuenow', percentComplete);
-        
-        popupProgressBar.style.width = percentComplete + '%';
-        popupProgressBar.textContent = percentComplete + '%';
-        popupProgressBar.setAttribute('aria-valuenow', percentComplete);
-      }
-    };
-    
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          if (data.success) {
-            showNotification(true, 'Success', 'Your media has been uploaded successfully!');
-          } else {
-            showNotification(false, 'Error', data.message || 'Upload failed. Please try again.');
-          }
-        } catch (error) {
-          showNotification(false, 'Error', 'Error processing server response.');
-        }
-        
-        // Hide progress bars and popup
-        progressContainer.style.display = 'none';
-        uploadPopupContainer.style.display = 'none';
-      } else {
-        showNotification(false, 'Error', 'Server responded with an error status: ' + xhr.status);
-        progressContainer.style.display = 'none';
-        uploadPopupContainer.style.display = 'none';
-      }
-    };
-    
-    xhr.onerror = function() {
-      console.error('Upload error:', xhr.statusText);
-      showNotification(false, 'Error', 'Error uploading file: ' + xhr.statusText);
-      progressContainer.style.display = 'none';
-      uploadPopupContainer.style.display = 'none';
-    };
-    
-    xhr.send(formData);
+uploadForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Form validation
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('description').value;
+  const category_id = document.getElementById('category_id').value;
+  
+  let missingFields = [];
+  if (!title) missingFields.push('Title');
+  if (!description) missingFields.push('Description');
+  if (!category_id || category_id === '-- Select Category --') missingFields.push('Category');
+  if (files.length === 0) missingFields.push('Media Files');
+  
+  if (missingFields.length > 0) {
+    showNotification(false, 'Missing Fields', 'Please fill in the following: ' + missingFields.join(', '));
+    return;
+  }
+  
+  const formData = new FormData();
+  
+  // Add form fields
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('category_id', category_id);
+  formData.append('is_intro', document.getElementById('is_intro').checked);
+  
+  // Add all files with the same field name
+  files.forEach((file) => {
+    formData.append('files', file);
   });
+  
+  // Add poster image if it exists and a video is being uploaded
+  if (posterFile && files.some(file => file.type.startsWith('video/'))) {
+    formData.append('posterImage', posterFile);
+  }
+  
+  // Log what we're sending
+  console.log('Submitting form with files:', files.length);
+  console.log('Poster file:', posterFile ? posterFile.name : 'None');
+  
+  // Show regular progress bar and popup
+  progressContainer.style.display = 'block';
+  progressBar.style.width = '0%';
+  progressBar.textContent = '0%';
+  
+  // Show popup progress
+  uploadPopupContainer.style.display = 'flex';
+  const popupProgressBar = document.querySelector('.popup-progress-bar');
+  popupProgressBar.style.width = '0%';
+  popupProgressBar.textContent = '0%';
+  
+  // Submit using XMLHttpRequest with progress tracking
+  const xhr = new XMLHttpRequest();
+  
+  // CRITICAL FIX: Use the correct endpoint URL - must match your backend route
+  xhr.open('POST', '/upload-media', true);
+  
+  xhr.upload.onprogress = function(e) {
+    if (e.lengthComputable) {
+      const percentComplete = Math.round((e.loaded / e.total) * 100);
+      
+      // Update both progress bars
+      progressBar.style.width = percentComplete + '%';
+      progressBar.textContent = percentComplete + '%';
+      progressBar.setAttribute('aria-valuenow', percentComplete);
+      
+      popupProgressBar.style.width = percentComplete + '%';
+      popupProgressBar.textContent = percentComplete + '%';
+      popupProgressBar.setAttribute('aria-valuenow', percentComplete);
+      
+      console.log('Upload progress:', percentComplete + '%');
+    }
+  };
+  
+  xhr.onload = function() {
+    console.log('Response received:', xhr.status, xhr.responseText);
+    
+    if (xhr.status >= 200 && xhr.status < 300) {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        console.log('Parsed response:', data);
+        
+        if (data.success || data.files) {
+          showNotification(true, 'Success', 'Your media has been uploaded successfully!');
+          
+          // Reset form on success
+          setTimeout(() => {
+            resetForm();
+            // Optionally redirect to a listing page
+            // window.location.href = '/media/list';
+          }, 2000);
+        } else {
+          showNotification(false, 'Error', data.message || 'Upload failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error parsing response:', error, xhr.responseText);
+        showNotification(false, 'Error', 'Error processing server response.');
+      }
+    } else {
+      let errorMessage = 'Server responded with an error status: ' + xhr.status;
+      
+      try {
+        const errorData = JSON.parse(xhr.responseText);
+        if (errorData.message || errorData.error) {
+          errorMessage = errorData.message || errorData.error;
+        }
+      } catch (e) {
+        // Use default error message
+      }
+      
+      console.error('Upload error:', errorMessage);
+      showNotification(false, 'Error', errorMessage);
+    }
+    
+    // Hide progress bars and popup
+    progressContainer.style.display = 'none';
+    uploadPopupContainer.style.display = 'none';
+  };
+  
+  xhr.onerror = function() {
+    console.error('Network error during upload:', xhr.statusText);
+    showNotification(false, 'Connection Error', 'Could not connect to the server. Please check your internet connection and try again.');
+    
+    // Hide progress bars and popup
+    progressContainer.style.display = 'none';
+    uploadPopupContainer.style.display = 'none';
+  };
+  
+  xhr.ontimeout = function() {
+    console.error('Upload timed out');
+    showNotification(false, 'Timeout Error', 'The upload request timed out. Please try with smaller files or check your connection.');
+    
+    // Hide progress bars and popup
+    progressContainer.style.display = 'none';
+    uploadPopupContainer.style.display = 'none';
+  };
+  
+  // Set a reasonable timeout for large uploads
+  xhr.timeout = 300000; // 5 minutes
+  
+  // Send the form data
+  xhr.send(formData);
+  
+  console.log('Request sent to server');
+});
   
 
   

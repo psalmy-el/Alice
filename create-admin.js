@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const db = require('./config/database');
 
 async function createAdmin() {
+  console.log('Attempting to connect to the database...');
+
   try {
     // Admin details - customize these!
     const adminDetails = {
