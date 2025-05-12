@@ -44,12 +44,9 @@ const uploadToCloudinary = (file) => {
 // Route: POST /upload-media
 router.post('/upload-media', upload.array('files', 10), async (req, res) => {
   try {
-    console.log("Request body:", req.body);
     
     // Verify files are present
     const files = req.files || [];
-    
-    console.log("Request files count:", files.length);
     
     if (files.length === 0) {
       return res.status(400).json({ 
@@ -88,6 +85,9 @@ router.post('/set-primary/:mediaId/:fileId', isAuthenticated, mediaController.se
 
 // Get media details
 router.get('/details/:id', isAuthenticated, mediaController.getMediaDetails);
+
+// Get all files for a specific media
+router.get('/media/:id/files', isAuthenticated, mediaController.getMediaFiles);
 
 // Filter media by category
 router.get('/filter/:categoryId', mediaController.filterByCategory); // This one can remain public if needed

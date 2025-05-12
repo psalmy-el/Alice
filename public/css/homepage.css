@@ -52,176 +52,174 @@ a:hover {
     color: #888888;
 }
 
-/* Improved Logo Animation Styles */
-.logo {
-    transition: all 0.5s ease;
-    position: relative;
-    z-index: 200;
-    display: inline-block;
-}
+/*Logo Animation Styles */
+.logo {     
+    transition: all 0.5s ease;     
+    position: relative;     
+    z-index: 200;     
+    display: inline-block; 
+} 
 
-.logo-img {
-    max-height: 30px;
-    width: auto;
-    display: block;
-}
+.logo-img {     
+    max-height: 40px;     
+    width: auto;     
+    display: block; 
+} 
 
-.logo-scrolled {
-    position: fixed;
-    top: 15px;
-    transition: all 0.6s ease-out;
-}
+.logo-scrolled {     
+    position: fixed;     
+    top: 15px;     
+    transition: all 0.8s ease-out; /* Slowed down transition */
+} 
 
-.logo-wrapper {
-    display: inline-block;
-    transform-origin: center center;
-    transition: transform 0.5s ease;
-}
+.logo-wrapper {     
+    display: inline-block;     
+    transform-origin: center center;     
+    transition: transform 0.8s ease; /* Slowed down rotation */ 
+} 
 
-/* Header layout change when scrolled */
-header.layout-changed .header-inner {
-    flex-direction: column;
-    align-items: flex-start;
-}
+/* Header layout change when scrolled */ 
+header.layout-changed .header-inner {     
+    flex-direction: column;     
+    align-items: flex-start; 
+} 
 
-header.layout-changed .main-nav {
-    margin-top: 40px;
-    margin-left: auto;
-    align-self: flex-end;
-    margin-right: 20px;
-}
+header.layout-changed .main-nav {     
+    margin-top: 40px;     
+    margin-left: auto;     
+    align-self: flex-end;     
+    margin-right: 20px; 
+} 
 
-/* Custom cursor styles - updated to use logo image */
-.custom-cursor {
-    position: fixed;
-    width: 80px;
-    height: 70px;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    transform: translate(-50%, -50%);
-    background: none;
-}
+/* Custom cursor styles - updated to use logo image */ 
+.custom-cursor {     
+    position: fixed;     
+    width: 70px;     
+    height: 60px;     
+    pointer-events: none;     
+    z-index: 9999;     
+    opacity: 0;     
+    transition: opacity 0.2s ease;     
+    transform: translate(-50%, -50%);     
+    background: none; 
+} 
 
-.custom-cursor img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transform-origin: center;
-    animation: spin 2s linear infinite; /* Add spinning animation to cursor */
-}
+.custom-cursor img {     
+    width: 100%;     
+    height: 100%;     
+    object-fit: contain;     
+    transform-origin: center;     
+    animation: spin 2s linear infinite; /* Add spinning animation to cursor */ 
+} 
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
+@keyframes spin {     
+    from { transform: rotate(0deg); }     
+    to { transform: rotate(360deg); } 
+} 
 
-.custom-cursor.active {
-    opacity: 1;
-}
+.custom-cursor.active {     
+    opacity: 1; 
+} 
 
 /* Interactive elements should have default cursor */
-a, button, .grid-item-inner, .social-link, .play-button, input, textarea, select {
-    cursor: pointer;
-}
+a, button, .grid-item-inner, .social-link, .play-button, input, textarea, select {     
+    cursor: pointer; 
+} 
 
-/* Container and Layout */
-.container {
-    width: 90%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
+/* Container and Layout */ 
+.container {     
+    width: 90%;     
+    max-width: 1400px;     
+    margin: 0 auto;     
+    padding: 0 20px; 
+} 
 
-/* Header and Navigation */
-header {
-    padding: 30px 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 100;
-    transition: all 0.3s ease;
-}
+/* Header and Navigation */ 
+header {     
+    padding: 30px 0;     
+    position: fixed;     
+    top: 0;     
+    left: 0;     
+    width: 100%;     
+    z-index: 100;     
+    transition: all 0.3s ease; 
+} 
 
-header.scrolled {
-    padding: 15px 0;
-    background-color: rgba(255, 208, 227, 0.9); /* Semi-transparent header background */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    min-height: 80px; /* Ensure enough height for the layout change */
-}
+header.scrolled {     
+    padding: 15px 0;     
+    background-color: rgba(255, 208, 227, 0.9); /* Semi-transparent header background */     
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);     
+    min-height: 80px; /* Ensure enough height for the layout change */ 
+} 
 
-.header-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    transition: all 0.4s ease;
-}
+.header-inner {     
+    display: flex;     
+    justify-content: space-between;     
+    align-items: center;     
+    position: relative;     
+    transition: all 0.4s ease; 
+} 
 
-/* Header layout change for scrolled state */
-header.layout-changed .header-inner {
-    flex-direction: column;
-    align-items: flex-end; /* Align to the right */
-}
+/* Header layout change for scrolled state */ 
+header.layout-changed .header-inner {     
+    flex-direction: column;     
+    align-items: flex-end; /* Align to the right */ 
+} 
 
-header.layout-changed .logo {
-    position: absolute; /* Take logo out of normal flow */
-    margin-bottom: 5px;
-    z-index: 160; /* Ensure logo stays above nav */
-}
+header.layout-changed .logo {     
+    position: absolute; /* Take logo out of normal flow */     
+    margin-bottom: 5px;     
+    z-index: 160; /* Ensure logo stays above nav */ 
+} 
 
-header.layout-changed .main-nav {
-    margin-top: 40px; /* Create space for logo */
-    align-self: flex-end; /* Keep nav on right */
-    width: auto;
-}
+header.layout-changed .main-nav {     
+    margin-top: 40px; /* Create space for logo */     
+    align-self: flex-end; /* Keep nav on right */     
+    width: auto; 
+} 
 
-.nav-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-}
+.nav-toggle {     
+    display: none;     
+    background: none;     
+    border: none;     
+    font-size: 24px;     
+    cursor: pointer; 
+} 
 
-.close-nav {
-    display: none;
-}
+.close-nav {     
+    display: none; 
+} 
 
-.main-nav {
-    position: relative;
-    z-index: 150;
-    transition: all 0.4s ease;
-}
+.main-nav {     
+    position: relative;     
+    z-index: 150;     
+    transition: all 0.4s ease; 
+} 
 
-.main-nav ul {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
+.main-nav ul {     
+    display: flex;     
+    list-style: none;     
+    margin: 0;     
+    padding: 0; 
+} 
 
-.main-nav li {
-    margin-left: 20px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
+.main-nav li {     
+    margin-left: 20px;     
+    padding: 8px 12px;     
+    transition: all 0.3s ease; 
+} 
 
-.main-nav li:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-}
+.main-nav li:hover {     
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);     
+    transform: translateY(-2px); 
+} 
 
-.main-nav a {
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #0f33ff;
+.main-nav a {     
+    font-size: 14px;     
+    font-weight: bold;     
+    text-transform: uppercase;     
+    letter-spacing: 1px;     
+    color: #0f33ff; 
 }
 /* end of header navigatio*/
 
@@ -807,7 +805,7 @@ a.grid-item-inner {
   }
 
   .modal-footer{
-    margin: 10px 1rem;
+    margin-top: 5rem;
   }
 
   .modal-footer a{
@@ -979,10 +977,45 @@ grid-template-columns: 1fr;
         width: 110px;
     }
 
-    .video-grid {
-        column-count: 1;
+      .custom-cursor {
+        display: none !important;  /* Force hide on small screens */
     }
     
+    /* Make sure logo stays centered and just rotates on mobile */
+    .logo-scrolled {
+        max-width: 80%; /* Limit logo width on mobile */
+        right: auto; /* Prevent overlapping right edge */
+        left: 50% !important; /* Center the logo horizontally */
+        transform: translateX(-50%); /* Perfect centering */
+    }
+    
+    /* Special class for mobile logo rotation */
+    .logo-wrapper {
+        animation-duration: 3s; /* Slower rotation */
+    }
+    
+    /* Adjust header for mobile */
+    header.layout-changed .logo {
+        position: fixed;
+        /* Center the logo on mobile instead of moving it */
+        left: 50% !important; /* Center position */
+        transform: translateX(-50%); /* Ensure perfect centering */
+        top: 15px !important; /* Keep it at the top */
+        max-width: 60%; /* Ensure the logo doesn't take too much space */
+    }
+    
+    /* Ensure main nav doesn't get hidden behind logo */
+    header.layout-changed .main-nav {
+        width: 100%;
+        margin-top: 60px; /* More space for the logo */
+    }
+    
+    /* Ensure the rotation is visible and prioritized on mobile */
+    .logo-wrapper {
+        transform-origin: center center;
+        transition: transform 0.5s ease !important; /* Faster rotation transition */
+    }
+
         /* Main navigation for mobile */
         .main-nav {
             display: none;
@@ -1240,10 +1273,6 @@ grid-template-columns: 1fr;
         box-shadow: none !important;
     }
          
-    .modal-header, .modal-footer {
-        padding: 1rem;
-    }
-
     .close-modal{
         top: 5px;
     }

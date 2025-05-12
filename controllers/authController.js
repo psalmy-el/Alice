@@ -39,19 +39,11 @@ exports.login = async (req, res) => {
     req.session.adminId = admin.id;
     req.session.adminUsername = admin.username;
     
-    // Debug session data
-    console.log('Session after login:', {
-      id: req.session.id,
-      adminId: req.session.adminId,
-      adminUsername: req.session.adminUsername
-    });
-    
     // Explicitly save session before redirect
     req.session.save((err) => {
       if (err) {
         console.error('Session save error:', err);
       }
-      console.log('Session saved successfully');
       res.redirect('/dashboard');
     });
   } catch (error) {
@@ -114,7 +106,6 @@ exports.forgotPassword = async (req, res) => {
       req.flash('success', 'Password reset link sent to your email');
     } else {
       // If email fails, show the token on screen (not ideal for production, but works for development)
-      console.log('Using fallback for reset URL display due to email failure');
       req.flash('success', `Email sending failed. Use this link to reset: ${resetUrl}`);
     }
     
@@ -244,7 +235,6 @@ exports.changePassword = async (req, res) => {
     });
     
     if (emailSent) {
-      console.log('Password change notification email sent successfully');
     } else {
       console.warn('Failed to send password change notification email');
     }

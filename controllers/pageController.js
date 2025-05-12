@@ -5,7 +5,6 @@ const Category = require('../models/categoryModel');
 // Homepage/landing page controller
 exports.getHomepage = async (req, res) => {
   try {
-    console.log('Homepage route accessed');
     
     // Get all media items for display on homepage
     let allMedia = [];
@@ -20,7 +19,6 @@ exports.getHomepage = async (req, res) => {
         Media.getFeaturedVideo() // Method to get a featured video
       ]);
       
-      console.log('Database fetch successful');
     } catch (dbError) {
       console.error('Database error:', dbError);
       // Continue with empty arrays
@@ -40,7 +38,7 @@ exports.getHomepage = async (req, res) => {
     const companyInfo = {
       name: 'Engdahls & Co Creative Studios',
       description: 'Engdahls & Co Creative Studios is an innovative and versatile production company offering high-quality commercial films, beautiful pictures and video productions. We create engaging and visually striking stories that help our clients reach their target audiences through creative and tailored solutions.',
-      logoPath: 'https://res.cloudinary.com/dawxl838a/image/upload/v1746860933/uploads/WhatsApp_Image_2025-03-30_at_19.48.20_926fb74f.jpg',
+      logoPath: 'https://res.cloudinary.com/dawxl838a/image/upload/v1746869871/WhatsApp_Image_2025-03-30_at_19.48.32_d7dd8868_pudffo.jpg',
       introHeading: 'Movie Productions'
     };
 
@@ -75,7 +73,6 @@ exports.getHomepage = async (req, res) => {
       'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
     ];
 
-    console.log('Rendering homepage template');
     res.render('homepage', { 
       title: companyInfo.name,
       logoPath: companyInfo.logoPath,
@@ -104,7 +101,6 @@ exports.getHomepage = async (req, res) => {
 
 // About page controller
 exports.getAboutPage = (req, res) => {
-  console.log('About page route accessed');
   
   // If it's an AJAX request, return just the modal status
   if (req.xhr || req.headers.accept.indexOf('json') > -1) {
@@ -122,7 +118,6 @@ exports.getAboutPage = (req, res) => {
 
 // Contact page controller
 exports.getContactPage = (req, res) => {
-  console.log('Contact page route accessed');
   res.render('contact', {
     title: 'Contact Us - Engdahls & Co Creative Studios',
     logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg'
@@ -131,7 +126,6 @@ exports.getContactPage = (req, res) => {
 
 // Dashboard page controller
 exports.getDashboard = async (req, res) => {
-  console.log('Dashboard route accessed');
   try {
     const media = await Media.getAll();
     res.render('dashboard', { 
@@ -146,7 +140,6 @@ exports.getDashboard = async (req, res) => {
 
 // Upload page controller
 exports.getUploadPage = (req, res) => {
-  console.log('Upload page route accessed');
   try {
     // Get categories for the dropdown in the upload form
     Category.getAll()
@@ -171,7 +164,6 @@ exports.getUploadPage = (req, res) => {
 
 // Edit page controller
 exports.getEditPage = (req, res) => {
-  console.log('Edit page route accessed');
   try {
     const mediaId = req.params.id;
     
@@ -204,7 +196,6 @@ exports.getEditPage = (req, res) => {
 
 // Gallery page controller
 exports.getGalleryPage = async (req, res) => {
-  console.log('Gallery page route accessed');
   try {
     const mediaId = req.params.id;
     

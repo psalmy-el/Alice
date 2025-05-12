@@ -34,9 +34,6 @@ exports.uploadMedia = async (req, res) => {
     // Get files from the request
     const files = req.files || [];
    
-    console.log('Received files:', files.length);
-    console.log('Received form data:', req.body);
-   
     if (files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -55,9 +52,7 @@ exports.uploadMedia = async (req, res) => {
         } else if (file.mimetype.startsWith('image/')) {
           resourceType = 'image';
         }
-        
-        console.log(`Uploading file as ${resourceType}: ${file.originalname} (${file.mimetype})`);
-       
+
         const stream = cloudinary.uploader.upload_stream(
           {
             folder: 'uploads',
@@ -65,7 +60,6 @@ exports.uploadMedia = async (req, res) => {
           },
           (error, result) => {
             if (result) {
-              console.log(`Successfully uploaded to Cloudinary: ${file.originalname}`);
               resolve({
                 originalname: file.originalname,
                 url: result.secure_url,
@@ -83,7 +77,6 @@ exports.uploadMedia = async (req, res) => {
    
     // Determine the type from the first file
     const type = files[0].mimetype.startsWith('image/') ? 'image' : 'video';
-    console.log(`Setting media type as: ${type}`);
    
     // Create the main media entry
     const mediaId = await Media.create({
@@ -92,8 +85,6 @@ exports.uploadMedia = async (req, res) => {
       type,
       category_id
     });
-   
-    console.log(`Created media entry with ID: ${mediaId}`);
    
     // Add files to the media entry
     await Media.addFiles(mediaId, cloudinaryFiles.map(file => ({
@@ -159,16 +150,7 @@ exports.updateMedia = async (req, res) => {
   try {
     const { title, description, category_id, replace_files } = req.body;
     const id = req.params.id;
-    
-    console.log('Update request received:', {
-      id,
-      title,
-      description,
-      category_id,
-      replace_files,
-      hasFiles: req.files && req.files.files ? req.files.files.length : 0,
-    });
-    
+     
     // Validate required fields
     if (!title || !description || !category_id) {
       return res.status(400).json({ 
@@ -189,7 +171,6 @@ exports.updateMedia = async (req, res) => {
     
     // If new files were uploaded and replace_files is true
     if (req.files && req.files.files && req.files.files.length > 0 && replace_files === 'true') {
-      console.log('Processing new files for replacement:', req.files.files.length);
       
       // Get existing file paths to delete them from Cloudinary
       const filesToDelete = existingMedia.files.map(file => {
@@ -203,7 +184,6 @@ exports.updateMedia = async (req, res) => {
       // Delete all existing files from Cloudinary
       for (const publicId of filesToDelete) {
         try {
-          console.log('Deleting file from Cloudinary:', publicId);
           // Determine resource type based on file extension
           const isVideo = existingMedia.type === 'video';
           const resourceType = isVideo ? 'video' : 'image';
@@ -223,7 +203,6 @@ exports.updateMedia = async (req, res) => {
         try {
           // Determine resource type based on file mimetype
           const resourceType = file.mimetype.startsWith('video/') ? 'video' : 'image';
-          console.log(`Uploading file as ${resourceType}: ${file.originalname}`);
           
           const cloudinaryResult = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
@@ -253,7 +232,6 @@ exports.updateMedia = async (req, res) => {
       }
       
       // Add new files to database
-      console.log('Adding new files:', cloudinaryFiles.length);
       await Media.addFiles(id, cloudinaryFiles);
       
       // If this is a video, determine media type
@@ -290,9 +268,24 @@ exports.getMediaFiles = async (req, res) => {
       });
     }
     
+    // Normalize file data and ensure all files have necessary properties
+    const normalizedFiles = media.files.map(file => ({
+      id: file.id,
+      file_path: file.file_path,
+      path: file.file_path, // Add path for compatibility
+      type: media.type === 'video' || file.file_path.match(/\.(mp4|webm|ogg)$/i) ? 'video' : 'image',
+      is_primary: file.is_primary === 1 || file.is_primary === true
+    }));
+    
+    // Ensure primary file is first in the array
+    const sortedFiles = [
+      ...normalizedFiles.filter(file => file.is_primary),
+      ...normalizedFiles.filter(file => !file.is_primary)
+    ];
+      
     res.json({
       success: true,
-      files: media.files
+      files: sortedFiles
     });
   } catch (error) {
     console.error('Error fetching media files:', error);

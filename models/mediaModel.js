@@ -230,7 +230,6 @@ class Media {
       await db.execute(unsetQuery);
       await db.execute(setQuery, [mediaId]);
       
-      console.log(`Successfully set media ID ${mediaId} as intro video`);
       return true;
     } catch (error) {
       console.error('Error setting intro video:', error);
@@ -247,7 +246,6 @@ class Media {
         WHERE id = ?
       `;
       
-      console.log(`Adding poster image ${posterPath} to media ID ${mediaId}`);
       await db.execute(query, [posterPath, mediaId]);
       return true;
     } catch (error) {

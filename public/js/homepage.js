@@ -884,18 +884,42 @@ document.addEventListener('DOMContentLoaded', function() {
         const headerRect = header.getBoundingClientRect();
         const windowWidth = window.innerWidth;
         
-        // MODIFIED: Always calculate logo position proportionally to scroll
-        // Use a much longer scroll distance to control the movement (1500px instead of 150px)
+        // MODIFIED: Use a shorter scroll distance for quicker rotation (1500px instead of 3000px)
         const scrollProgress = Math.min(currentScrollY / 1500, 1); // Normalize between 0 and 1
-            
-        // Calculate target rotation based on scroll progress (more gradual)
-        const maxRotation = 360; // Max rotation in degrees
+        
+        // Calculate target rotation based on scroll progress (more aggressive)
+        // Multiple rotations as we scroll (up to 3 full rotations)
+        const maxRotation = 1080; // 3 full rotations (3 * 360 degrees)
         targetRotation = scrollProgress * maxRotation;
-            
+        
         // Calculate target position based on scroll progress
         const startLeft = originalLogoPosition ? originalLogoPosition.left : 0;
-        const endLeft = windowWidth * 0.75; // Target right position at 75% of window width
-        targetLeft = startLeft + (scrollProgress * (endLeft - startLeft));
+        
+        // MODIFIED: Different behavior based on screen size
+        // For mobile screens (less than 768px wide), only rotate, don't move
+        if (windowWidth < 768) {
+            // Keep logo in original position for small screens
+            targetLeft = startLeft;
+        } else {
+            // For larger screens, allow movement but reduce it
+            // Only move 40% of what we were doing before (prioritize rotation over movement)
+            const endLeftPercentage = 0.4; // Reduced movement (40% of window width)
+            
+            // Make sure the logo never goes off-screen by limiting the maximum position
+            const maxPosition = windowWidth - (logo.offsetWidth + 20); // 20px buffer from edge
+            const calculatedEndLeft = Math.min(windowWidth * endLeftPercentage, maxPosition);
+            targetLeft = startLeft + (scrollProgress * (calculatedEndLeft - startLeft));
+            
+            // ADDED: Check if we've scrolled past the endpoint, then reverse the animation
+            const reversePoint = 2000; // Start reversing after 2000px of scroll
+            if (currentScrollY > reversePoint) {
+                // Calculate how far past the reverse point we are
+                const reverseProgress = Math.min((currentScrollY - reversePoint) / 1000, 1);
+                
+                // Gradually move back toward the left
+                targetLeft = calculatedEndLeft - (reverseProgress * (calculatedEndLeft - startLeft));
+            }
+        }
         
         // Add scrolled class to header when scrolling down
         if (currentScrollY > 50) {
@@ -943,9 +967,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to smoothly animate both rotation and position
     function animateLogoMovement() {
-        // MODIFIED: Further reduced easing values for even slower, smoother movement
-        const rotationEase = 0.008; // Very slow rotation speed
-        const positionEase = 0.008; // Very slow position speed
+        // MODIFIED: Increased rotation speed while keeping position movement slow
+        const rotationEase = 0.01; // Faster rotation speed
+        const positionEase = 0.004; // Keep position movement slow
         
         const dr = targetRotation - currentRotation;
         const dx = targetLeft - currentLeft;
@@ -1007,19 +1031,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add the logo to the cursor
     customCursor.appendChild(cursorLogoImg);
     
+    // ADDED: Check screen size before showing cursor
+    function isMobileDevice() {
+        return window.innerWidth < 768; // Common breakpoint for mobile devices
+    }
+    
     // Move the custom cursor with the mouse
     document.addEventListener('mousemove', (e) => {
-        customCursor.style.left = e.clientX + 'px';
-        customCursor.style.top = e.clientY + 'px';
+        // Only update cursor position if not on mobile
+        if (!isMobileDevice()) {
+            customCursor.style.left = e.clientX + 'px';
+            customCursor.style.top = e.clientY + 'px';
+        }
     });
     
-    // Show cursor only when hovering over the body, not on interactive elements
+    // Show cursor only when hovering over the body, not on interactive elements AND not on mobile
     document.addEventListener('mouseover', (e) => {
         // Check if we're hovering directly on the body or an empty area
         // and not on any interactive elements
         const isInteractiveElement = e.target.closest('a, button, .grid-item-inner, .social-link, .play-button, .nav-toggle, .close-nav, .main-nav, input, textarea, select, .modal');
         
-        if (!isInteractiveElement && e.target.tagName !== 'HTML') {
+        if (!isInteractiveElement && e.target.tagName !== 'HTML' && !isMobileDevice()) {
             customCursor.classList.add('active');
             document.body.classList.add('custom-cursor-active');
         } else {
@@ -1033,6 +1065,19 @@ document.addEventListener('DOMContentLoaded', function() {
         customCursor.classList.remove('active');
         document.body.classList.remove('custom-cursor-active');
     });
+    
+    // Check window resize to hide/show cursor based on device
+    window.addEventListener('resize', () => {
+        if (isMobileDevice()) {
+            customCursor.classList.remove('active');
+            document.body.classList.remove('custom-cursor-active');
+        }
+    });
+    
+    // Run initial screen size check
+    if (isMobileDevice()) {
+        customCursor.style.display = 'none'; // Completely hide on mobile
+    }
     
     // Run initial scroll check in case page loads already scrolled
     handleScroll();
