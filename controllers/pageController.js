@@ -45,7 +45,7 @@ exports.getHomepage = async (req, res) => {
     // Footer content
     const footerContent = {
       socialLinks: [
-        { name: 'Instagram', url: '#', icon: 'fab fa-instagram' }
+        { name: 'Instagram', url: 'https://www.instagram.com/alicengdahl/?hl=en', icon: 'fab fa-instagram' }
       ],
       quickLinks: [
         { name: 'Home', url: '/' },
@@ -61,7 +61,7 @@ exports.getHomepage = async (req, res) => {
         { name: 'Music Videos', url: '#video-grid-section' }
       ],
       contactInfo: [
-        { icon: '✉️', text: 'alice@rio.pictures' }
+        { icon: '✉️', text: '<a href="mailto:alice@rio.pictures">alice@rio.pictures</a>' }
       ]
     };
 
@@ -112,7 +112,7 @@ exports.getAboutPage = (req, res) => {
   // Otherwise, render the full about page (as fallback)
   res.render('about', {
     title: 'About - Alice Engdahl',
-    logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg'
+    logoPath: 'https://res.cloudinary.com/dawxl838a/image/upload/v1746869871/WhatsApp_Image_2025-03-30_at_19.48.32_d7dd8868_pudffo.jpg'
   });
 };
 
@@ -120,7 +120,7 @@ exports.getAboutPage = (req, res) => {
 exports.getContactPage = (req, res) => {
   res.render('contact', {
     title: 'Contact Us - Engdahls & Co Creative Studios',
-    logoPath: '/uploads/images/WhatsApp Image 2025-03-30 at 19.48.20_926fb74f.jpg'
+    logoPath: 'https://res.cloudinary.com/dawxl838a/image/upload/v1746869871/WhatsApp_Image_2025-03-30_at_19.48.32_d7dd8868_pudffo.jpg'
   });
 };
 
