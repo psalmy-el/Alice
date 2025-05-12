@@ -371,7 +371,7 @@ header.layout-changed .main-nav {
 }
 
 .video-grid {
-    column-count: 4;
+    column-count: 5;
     column-gap: 20px;
     width: 100%;
     position: relative;
@@ -959,17 +959,6 @@ a.grid-item-inner {
 .footer-container {
 grid-template-columns: 1fr;
 }
-}
-
-/* Responsive Styles */
-@media (max-width: 1200px) {
-    .video-grid {
-        column-count: 3;
-    }
-    
-    .intro-container {
-        width: 90%;
-    }
 }
 
 @media (max-width: 768px) {
