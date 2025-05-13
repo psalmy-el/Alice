@@ -1,31 +1,13 @@
- /* Import Asket Narrow font - Add the correct URL for your font */
-@font-face {
-    font-family: 'Asket Narrow';
-    src: url('/fonts/AsketNarrow-Regular.woff2') format('woff2'),
-         url('/fonts/AsketNarrow-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: 'Asket Narrow';
-    src: url('/fonts/AsketNarrow-Bold.woff2') format('woff2'),
-         url('/fonts/AsketNarrow-Bold.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-  }
-  
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Asket Narrow', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'IBM Plex Sans Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
   }
 
 /* Your existing styles */
 body {
+    font-family: 'IBM Plex Sans Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
     background-color: #ffd0e3;
     color: #333333;
     line-height: 1.6;
@@ -816,9 +798,8 @@ a.grid-item-inner {
 
   /* Footer */
   footer {
-     /* Darker background */
     padding: 70px 0 30px;
-    color: #000000;
+    color: blue;
     margin-top: 50px;
 }
 
@@ -847,7 +828,7 @@ a.grid-item-inner {
     font-weight: 500;
     margin-bottom: 20px;
     letter-spacing: 1px;
-    color: #000000;
+    color: blue;
     position: relative;
     padding-bottom: 10px;
 }
@@ -859,7 +840,7 @@ a.grid-item-inner {
     bottom: 0;
     width: 40px;
     height: 2px;
-    background-color: #000000;
+    background-color: blue;
 }
 
 .footer-column p {
@@ -878,7 +859,7 @@ a.grid-item-inner {
 }
 
 .footer-links a {
-    color: #000000;
+    color: blue;
     font-size: 14px;
     transition: all 0.3s ease;
 }
@@ -892,16 +873,17 @@ a.grid-item-inner {
     margin-bottom: 15px;
     display: flex;
     align-items: flex-start;
+    color: #0066cc;
 }
 
 .contact-info-icon {
     margin-right: 10px;
-    color: #000000;
+    color: blue;
     font-weight: bold;
 }
 
-.contact-info-text {
-    color: #000000;
+.contact-info-text a{
+    color: #181bc5;
     font-size: 14px;
 }
 
@@ -932,7 +914,7 @@ a.grid-item-inner {
   
   .social-link i {
     font-size: 16px;
-    color: #333;
+    color: blue;
   }
   
   .social-link:hover {

@@ -1,26 +1,8 @@
-@font-face {
-  font-family: 'Asket Narrow';
-  src: url('/fonts/AsketNarrow-Regular.woff2') format('woff2'),
-       url('/fonts/AsketNarrow-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Asket Narrow';
-  src: url('/fonts/AsketNarrow-Bold.woff2') format('woff2'),
-       url('/fonts/AsketNarrow-Bold.woff') format('woff');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Asket Narrow', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'IBM Plex Sans Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
 }
 
 /* Navbar styling for consistent header */
@@ -54,10 +36,15 @@
   text-decoration: none;
 }
 
+.card-body{
+  color: #2956eb;
+}
+
 .small-text {
   font-size: 0.85rem;
   padding: 0.5rem 0.75rem;
 }
+
 
 #previews, #newFilePreviews, #posterPreview {
   display: flex;

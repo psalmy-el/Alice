@@ -50,7 +50,7 @@ navLinks.forEach(link => {
     });
 });
 
-// Animation section
+//Grid Animation section
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize variables
     const videoGrid = document.querySelector('.video-grid');

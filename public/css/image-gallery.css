@@ -1,38 +1,20 @@
-@font-face {
-    font-family: 'Asket Narrow';
-    src: url('/fonts/AsketNarrow-Regular.woff2') format('woff2'),
-         url('/fonts/AsketNarrow-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-  
-@font-face {
-    font-family: 'Asket Narrow';
-    src: url('/fonts/AsketNarrow-Bold.woff2') format('woff2'),
-         url('/fonts/AsketNarrow-Bold.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-}
-  
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Asket Narrow', 'Helvetica Neue', Arial, sans-serif;
+   font-family: 'IBM Plex Sans Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
 }
 
 body {
-    background-color: #ffffff;
-    color: #333333;
+    background-color: #ffd0e3;
+    color: #1416b1;
     line-height: 1.6;
     overflow-x: hidden;
 }
 
 a {
     text-decoration: none;
-    color: #333333;
+    color: #0b1496;
     transition: all 0.3s ease;
 }
 
@@ -48,7 +30,7 @@ header {
     left: 0;
     width: 100%;
     z-index: 100;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: #ffd0e3;
     transition: all 0.3s ease;
 }
 
@@ -106,7 +88,7 @@ header.scrolled {
 .gallery-container {
     max-width: 1000px;
     margin: 0 auto;
-    background-color: white;
+    background-color: #ffd0e3;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 30px;
@@ -120,7 +102,7 @@ header.scrolled {
     border-radius: 4px;
     margin-bottom: 20px;
     position: relative;
-    border: 1px solid #eee;
+    border: 1px solid #ffd0e3;
     overflow: hidden;
 }
 
@@ -262,7 +244,7 @@ header.scrolled {
 
 .media-metadata {
     font-size: 14px;
-    color: #666;
+    color: #121a96;
 }
 
 .category-label {
@@ -276,7 +258,7 @@ header.scrolled {
     display: inline-block;
     padding: 10px 20px;
     background-color: #f0f0f0;
-    color: #333;
+    color: #0f1d9b;
     border-radius: 4px;
     text-decoration: none;
     transition: background-color 0.2s;
@@ -288,7 +270,7 @@ header.scrolled {
 
 h1 {
     margin-bottom: 30px;
-    color: #333;
+    color: #14289c;
     text-align: center;
 }
 
