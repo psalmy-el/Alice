@@ -34,45 +34,6 @@ exports.getHomepage = async (req, res) => {
     const images = allMedia.filter(item => item.type === 'image');
     const videos = allMedia.filter(item => item.type === 'video');
     
-    // Get company information (you might want to store this in a database later)
-    const companyInfo = {
-      name: 'Engdahls & Co Creative Studios',
-      description: 'Engdahls & Co Creative Studios is an innovative and versatile production company offering high-quality commercial films, beautiful pictures and video productions. We create engaging and visually striking stories that help our clients reach their target audiences through creative and tailored solutions.',
-      logoPath: 'https://res.cloudinary.com/dawxl838a/image/upload/v1746869871/WhatsApp_Image_2025-03-30_at_19.48.32_d7dd8868_pudffo.jpg',
-      introHeading: 'Movie Productions'
-    };
-
-    // Footer content
-    const footerContent = {
-      socialLinks: [
-        { name: 'Instagram', url: 'https://www.instagram.com/alicengdahl/?hl=en', icon: 'fab fa-instagram' }
-      ],
-      quickLinks: [
-        { name: 'Home', url: '/' },
-        { name: 'About', url: '/about' }
-      ],
-      services: [
-        { name: 'Commercial Production', url: '#video-grid-section' },
-        { name: 'Brand Films', url: '#video-grid-section' },
-        { name: 'Documentary', url: '#video-grid-section' },
-        { name: 'Corporate Videos', url: '#video-grid-section' },
-        { name: 'Motion Graphics', url: '#video-grid-section' },
-        { name: 'Social Media Content', url: '#video-grid-section' },
-        { name: 'Music Videos', url: '#video-grid-section' }
-      ],
-      contactInfo: [
-        { icon: '✉️', text: '<a href="mailto:alice@rio.pictures">alice@rio.pictures</a>' }
-      ]
-    };
-
-    // About modal content
-    const aboutContent = [
-      'Alice Engdahls',
-      'Producer at Rio Pictures',
-      'send me an email',
-      'Our passionate team of directors, cinematographers, and editors work collaboratively to bring your vision to life with stunning visuals and compelling narratives.'
-    ];
-
     res.render('homepage', { 
       title: companyInfo.name,
       logoPath: companyInfo.logoPath,

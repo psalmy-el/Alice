@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BackEndProduction - Film Production</title>
+    <style>
+         * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'IBM Plex Sans Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+/* Header */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 20px 0;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff6b35;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.logo:hover {
+    color: #ff8c42;
+}
+
+.language-toggle {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    min-width: 50px;
+}
+
+.language-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 107, 53, 0.3);
+}
+
+.menu-toggle {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background-color: #ffffff;
+    margin: 3px 0;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Updated Navigation Menu */
+.nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.nav-menu.active {
+    right: 0;
+}
+
+.nav-menu-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 120px 40px 60px;
+    height: 100%;
+    align-content: start;
+}
+
+.nav-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-links ul li {
+    margin: 0 0 30px 0;
+}
+
+.nav-links ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 2.5rem;
+    font-weight: 300;
+    transition: all 0.3s ease;
+    display: block;
+    line-height: 1.2;
+}
+
+.nav-links ul li a:hover {
+    color: #ff6b35;
+    transform: translateX(10px);
+}
+
+.nav-what-we-do {
+padding-top: 20px;
+}
+
+.nav-what-we-do h3 {
+color: #ff6b35;
+font-size: 1.2rem;
+font-weight: 600;
+margin-bottom: 25px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.nav-what-we-do ul {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.nav-what-we-do ul li {
+color: #cccccc;
+font-size: 1rem;
+line-height: 1.6;
+margin-bottom: 15px;
+padding-left: 0;
+transition: color 0.3s ease;
+cursor: pointer;
+}
+
+.nav-what-we-do ul li:hover {
+color: #ffffff;
+}
+
+.nav-services {
+padding-top: 20px;
+}
+
+.nav-services h3 {
+color: #ff6b35;
+font-size: 1.2rem;
+font-weight: 600;
+margin-bottom: 25px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.nav-services ul {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.nav-services ul li {
+color: #cccccc;
+font-size: 1rem;
+line-height: 1.6;
+margin-bottom: 15px;
+padding-left: 0;
+transition: color 0.3s ease;
+cursor: pointer;
+}
+
+.nav-services ul li:hover {
+color: #ffffff;
+}
+
+.nav-contact h3 {
+color: #ff6b35;
+font-size: 1.2rem;
+font-weight: 600;
+margin-bottom: 25px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.nav-contact {
+    padding-top: 20px;
+    align-self: end;
+}
+
+.contact-info p {
+    color: #cccccc;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.contact-email {
+    color: #ff6b35 !important;
+    font-weight: 500;
+}
+
+.contact-phone:hover,
+.contact-location:hover {
+    color: #ffffff !important;
+}
+
+/* Video Hero Section */
+.video-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.video-hero video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+}
+
+.video-content {
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.video-content h1 {
+    font-size: 4rem;
+    font-weight: 300;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #ffffff, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeInUp 1s ease-out;
+}
+
+.video-content h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 30px;
+    font-style: italic;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    margin: 0 20px;
+}
+
+.grid-item {
+    position: relative;
+    width: 100%;
+    height: 50vh; /* Reduced from 60vh to match Crisp Film style */
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.grid-item:hover {
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+.grid-item img,
+.grid-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    transition: transform 0.3s ease;
+}
+
+.grid-item:hover img,
+.grid-item:hover video {
+    transform: scale(1.1);
+}
+
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(255, 107, 53, 0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.grid-item:hover .grid-overlay {
+    opacity: 1;
+}
+
+.grid-content {
+    text-align: center;
+    color: #ffffff;
+    padding: 20px;
+}
+
+.grid-content h3 {
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin-bottom: 10px;
+}
+
+.grid-content p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* About Page */
+.about-page {
+    display: none;
+    min-height: 100vh;
+    padding: 120px 0 80px;
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+}
+
+.about-page.active {
+    display: block;
+}
+
+.about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-title {
+    font-size: 3rem;
+    font-weight: 300;
+    margin-bottom: 40px;
+    color: #ff6b35;
+    text-align: center;
+}
+
+.about-subtitle {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 30px;
+    color: #ffffff;
+    font-style: italic;
+    text-align: center;
+}
+
+.about-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #cccccc;
+    margin-bottom: 40px;
+}
+
+.services-section {
+    margin-top: 80px;
+}
+
+.services-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 40px;
+    color: #ff6b35;
+    text-align: center;
+}
+
+.services-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.service-item {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+}
+
+.service-item:hover {
+    transform: translateY(-5px);
+    border-color: #ff6b35;
+    box-shadow: 0 20px 40px rgba(255, 107, 53, 0.1);
+}
+
+.service-item h4 {
+    color: #ff6b35;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.philosophy-section {
+    background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+    padding: 60px 40px;
+    margin: 80px 0;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.philosophy-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 30px;
+    color: #ff6b35;
+}
+
+.philosophy-text {
+    font-size: 1.2rem;
+    color: #cccccc;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Footer */
+footer {
+    background: #0a0a0a;
+    padding: 80px 0 40px;
+    border-top: 1px solid #333;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+}
+
+.newsletter {
+    text-align: center;
+}
+
+.newsletter h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #ff6b35;
+}
+
+.newsletter p {
+    margin-bottom: 30px;
+    color: #cccccc;
+}
+
+.newsletter-form {
+    display: flex;
+    max-width: 400px;
+    margin: 0 auto;
+    gap: 10px;
+}
+
+.newsletter-input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    color: #ffffff;
+    border-radius: 25px;
+    outline: none;
+}
+
+.newsletter-input:focus {
+    border-color: #ff6b35;
+}
+
+.newsletter-button {
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.newsletter-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+}
+
+.footer-info {
+    text-align: center;
+}
+
+.footer-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #ff6b35;
+}
+
+.footer-info p {
+    color: #cccccc;
+    margin-bottom: 10px;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 40px;
+    margin-top: 40px;
+    border-top: 1px solid #333;
+    color: #666;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    .nav-menu-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 100px 40px 60px;
+    }
+    
+    .nav-links ul li a {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-right {
+        gap: 15px;
+    }
+    
+    .language-toggle {
+        padding: 8px 16px;
+        font-size: 12px;
+        min-width: 45px;
+    }
+    
+    .nav-menu-content {
+        padding: 80px 20px 40px;
+        gap: 30px;
+    }
+    
+    .nav-links ul li a {
+        font-size: 1.8rem;
+    }
+    
+    .nav-services h3 {
+        font-size: 1rem;
+    }
+    
+    .nav-services ul li {
+        font-size: 0.9rem;
+    }
+    .video-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .video-content h2 {
+        font-size: 1.4rem;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .grid-item {
+        height: 50vh;
+    }
+    
+    .about-title {
+        font-size: 2rem;
+    }
+    
+    .about-subtitle {
+        font-size: 1.4rem;
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+    <nav>
+        <a href="#" class="logo">BEP</a>
+        <div class="nav-right">
+            <button class="language-toggle" onclick="toggleLanguage()">EN</button>
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="nav-menu">
+        <div class="nav-menu-content">
+            <div class="nav-links">
+                <ul>
+                    <li><a href="#" onclick="showAbout()" data-en="About" data-sv="Om oss">Om oss</a></li>
+                </ul>
+                <div class="nav-contact">
+                <h3 data-en="Contact" data-sv="Kontakt">Kontakt</h3>
+                <div class="contact-info">
+                    <p class="contact-email">info@backendproduction.se</p>
+                    <p class="contact-phone">+46 123 456 789</p>
+                    <p class="contact-location" data-en="Stockholm, Sweden" data-sv="Stockholm, Sverige">Stockholm, Sverige</p>
+                </div>
+            </div>
+            </div>
+            
+            <div class="nav-what-we-do">
+                <h3 data-en="What we do" data-sv="Vad vi gör">Vad vi gör</h3>
+                <ul>
+                    <li data-en="Commercials and brand films" data-sv="Reklamfilm och varumärkesfilm">Reklamfilm och varumärkesfilm</li>
+                    <li data-en="Explainer videos and corporate communication" data-sv="Informationsfilm och företagskommunikation">Informationsfilm och företagskommunikation</li>
+                    <li data-en="Music videos and artist profiles" data-sv="Musikvideos och artistporträtt">Musikvideos och artistporträtt</li>
+                    <li data-en="Employer branding and recruitment films" data-sv="Employer branding och rekryteringsfilm">Employer branding och rekryteringsfilm</li>
+                    <li data-en="Content for web and social media" data-sv="Content för webb och sociala medier">Content för webb och sociala medier</li>
+                    <li data-en="Event films and documentation" data-sv="Eventfilm och dokumentation">Eventfilm och dokumentation</li>
+                </ul>
+            </div>
+            
+            <div class="nav-services">
+                <h3 data-en="Services" data-sv="Tjänster">Tjänster</h3>
+                <ul>
+                    <li data-en="Movie production" data-sv="Filmproduktion">Filmproduktion</li>
+                    <li data-en="Service production" data-sv="Serviceproduktion">Serviceproduktion</li>
+                    <li data-en="Photography" data-sv="Fotografi">Fotografi</li>
+                </ul>
+            </div>
+            
+            
+        </div>
+    </div>
+</header>
+
+    <!-- Main Home Page -->
+    <div id="home-page">
+        <!-- Video Hero Section -->
+        <section class="video-hero">
+            <video autoplay muted loop>
+                <source src="/uploads/All American - S06E01 HD (TvShows4Mobile.Com) otv-kjw8g.mp4" type="video/mp4">
+                <!-- Fallback for browsers that don't support video -->
+                <div style="background: linear-gradient(135deg, #0a0a0a, #ff6b35); height: 100vh; display: flex; align-items: center; justify-content: center;">
+                    <h1 style="color: white; text-align: center;">Video Not Supported</h1>
+                </div>
+            </video>
+            <div class="video-overlay">
+                <div class="video-content">
+                    <h1 data-en="BackEndProduction" data-sv="BackEndProduction">BackEndProduction</h1>
+                    <h2 data-en="Strong ideas deserve to be powerfully told." data-sv="Starka idéer förtjänar att bli starkt berättade.">Starka idéer förtjänar att bli starkt berättade.</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <section class="content-grid">
+            <div class="grid-item">
+                <img src="/uploads/3b2002c72ab3a1d639e8b65e3dda7e0e.jpg" alt="Commercial Film">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Commercial Films" data-sv="Reklamfilm">Reklamfilm</h3>
+                        <p data-en="Powerful brand stories that resonate" data-sv="Kraftfulla varumärkesberättelser som resonerar">Kraftfulla varumärkesberättelser som resonerar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay muted loop>
+                    <source src="/uploads/The Lord of the Rings - The Rings of Power - S02E03 HD (TvShows4Mobile.Com) otv-eglqh.mp4" type="video/mp4">
+                </video>
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Music Videos" data-sv="Musikvideos">Musikvideos</h3>
+                        <p data-en="Artistic vision brought to life" data-sv="Artistisk vision förverkligad">Artistisk vision förverkligad</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-item">
+                <img src="/uploads/2TYxz2UOTMOsfvz3mzERVQ.webp" alt="Commercial Film">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Commercial Films" data-sv="Reklamfilm">Reklamfilm</h3>
+                        <p data-en="Powerful brand stories that resonate" data-sv="Kraftfulla varumärkesberättelser som resonerar">Kraftfulla varumärkesberättelser som resonerar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay muted loop>
+                    <source src="/uploads/All American - S07E04 HD (TvShows4Mobile.Com) otv-7vdca.mp4" type="video/mp4">
+                </video>
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Music Videos" data-sv="Musikvideos">Musikvideos</h3>
+                        <p data-en="Artistic vision brought to life" data-sv="Artistisk vision förverkligad">Artistisk vision förverkligad</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-item">
+                <img src="/uploads/00e97d60eed5d0ead98627659ba5a200.jpg" alt="Commercial Film">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Commercial Films" data-sv="Reklamfilm">Reklamfilm</h3>
+                        <p data-en="Powerful brand stories that resonate" data-sv="Kraftfulla varumärkesberättelser som resonerar">Kraftfulla varumärkesberättelser som resonerar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay muted loop>
+                    <source src="/uploads/otu & ogba 2.mp4" type="video/mp4">
+                </video>
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Music Videos" data-sv="Musikvideos">Musikvideos</h3>
+                        <p data-en="Artistic vision brought to life" data-sv="Artistisk vision förverkligad">Artistisk vision förverkligad</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-item">
+                <img src="/uploads/00e97d60eed5d0ead98627659ba5a200.jpg" alt="Commercial Film">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Commercial Films" data-sv="Reklamfilm">Reklamfilm</h3>
+                        <p data-en="Powerful brand stories that resonate" data-sv="Kraftfulla varumärkesberättelser som resonerar">Kraftfulla varumärkesberättelser som resonerar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay muted loop>
+                    <source src="/uploads/The Lord of the Rings - The Rings of Power - S02E04 HD (TvShows4Mobile.Com) otv-a184z.mp4" type="video/mp4">
+                </video>
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Music Videos" data-sv="Musikvideos">Musikvideos</h3>
+                        <p data-en="Artistic vision brought to life" data-sv="Artistisk vision förverkligad">Artistisk vision förverkligad</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-item">
+                <img src="/uploads/00e97d60eed5d0ead98627659ba5a200.jpg" alt="Commercial Film">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Commercial Films" data-sv="Reklamfilm">Reklamfilm</h3>
+                        <p data-en="Powerful brand stories that resonate" data-sv="Kraftfulla varumärkesberättelser som resonerar">Kraftfulla varumärkesberättelser som resonerar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay muted loop>
+                    <source src="/uploads/otu & ogba 2.mp4" type="video/mp4">
+                </video>
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Music Videos" data-sv="Musikvideos">Musikvideos</h3>
+                        <p data-en="Artistic vision brought to life" data-sv="Artistisk vision förverkligad">Artistisk vision förverkligad</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <img src="/uploads/6c98d4f35503ff36ec1a14e5db6f0558.jpg" alt="Corporate Video">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Corporate Videos" data-sv="Företagsfilm">Företagsfilm</h3>
+                        <p data-en="Professional company presentations" data-sv="Professionella företagspresentationer">Professionella företagspresentationer</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <img src="/uploads/799e31567362bb889cf2ae5764db39c9.jpg" alt="Event Documentation">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Event Films" data-sv="Eventfilm">Eventfilm</h3>
+                        <p data-en="Capturing important moments" data-sv="Fångar viktiga ögonblick">Fångar viktiga ögonblick</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <video autoplay muted loop>
+                    <source src="/uploads/The Lord of the Rings - The Rings of Power - S02E05 HD (TvShows4Mobile.Com) otv-39ra2.mp4" type="video/mp4">
+                </video>
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Social Media Content" data-sv="Sociala medier">Sociala medier</h3>
+                        <p data-en="Optimized for digital platforms" data-sv="Optimerat för digitala plattformar">Optimerat för digitala plattformar</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-item">
+                <img src="/uploads/86c12c8c6ec8cbaa39b26e6f35453f89.jpg" alt="Explainer Videos">
+                <div class="grid-overlay">
+                    <div class="grid-content">
+                        <h3 data-en="Explainer Videos" data-sv="Informationsfilm">Informationsfilm</h3>
+                        <p data-en="Complex ideas made simple" data-sv="Komplexa idéer gjorda enkla">Komplexa idéer gjorda enkla</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="newsletter">
+                    <h3 data-en="Stay Updated" data-sv="Håll dig uppdaterad">Håll dig uppdaterad</h3>
+                    <p data-en="Subscribe to our newsletter for the latest projects and insights." data-sv="Prenumerera på vårt nyhetsbrev för de senaste projekten och insikterna.">Prenumerera på vårt nyhetsbrev för de senaste projekten och insikterna.</p>
+                    <form class="newsletter-form">
+                        <input type="email" class="newsletter-input" placeholder="Din e-postadress" data-en-placeholder="Your email address" data-sv-placeholder="Din e-postadress">
+                        <button type="submit" class="newsletter-button" data-en="Subscribe" data-sv="Prenumerera">Prenumerera</button>
+                    </form>
+                </div>
+                
+                <div class="footer-info">
+                    <h3 data-en="Contact" data-sv="Kontakt">Kontakt</h3>
+                    <p>info@backendproduction.se</p>
+                    <p>+46 123 456 789</p>
+                    <p data-en="Stockholm, Sweden" data-sv="Stockholm, Sverige">Stockholm, Sverige</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 BackEndProduction. <span data-en="All rights reserved." data-sv="Alla rättigheter förbehållna.">Alla rättigheter förbehållna.</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- About Page -->
+    <div id="about-page" class="about-page">
+        <div class="about-container">
+            <div class="about-content">
+                <h1 class="about-title" data-en="About Us" data-sv="Om oss">Om oss</h1>
+                <h2 class="about-subtitle" data-en="Strong ideas deserve to be powerfully told." data-sv="Starka idéer förtjänar att bli starkt berättade.">Starka idéer förtjänar att bli starkt berättade.</h2>
+                
+                <p class="about-text" data-en="At BackEndProduction, we transform communication ideas into living film – with feeling, sharpness and a clear purpose. From concept to finished delivery." data-sv="På BackEndProduction förvandlar vi kommunikationsidéer till levande film – med känsla, skärpa och ett tydligt syfte. Från koncept till färdig leverans.">På BackEndProduction förvandlar vi kommunikationsidéer till levande film – med känsla, skärpa och ett tydligt syfte. Från koncept till färdig leverans.</p>
+                
+                <p class="about-text" data-en="We believe in the power of stories that touch, explain and make people act. Whether it's about building a brand, driving sales or expressing an artistic vision, we help you reach out – through moving images that actually communicate." data-sv="Vi tror på kraften i berättelser som berör, förklarar och får människor att agera. Oavsett om det handlar om att bygga varumärke, driva försäljning eller ge uttryck åt en artistisk vision, hjälper vi dig att nå fram – genom rörlig bild som faktiskt kommunicerar.">Vi tror på kraften i berättelser som berör, förklarar och får människor att agera. Oavsett om det handlar om att bygga varumärke, driva försäljning eller ge uttryck åt en artistisk vision, hjälper vi dig att nå fram – genom rörlig bild som faktiskt kommunicerar.</p>
+                
+                <p class="about-text" data-en="We are a production agency that combines creative heights with secure project management. This means you get a committed partner throughout the process: from strategy and script to filming, editing and finished production. We deliver what we promise – on time, on budget and with quality." data-sv="Vi är en produktionsbyrå som kombinerar kreativ höjd med trygg projektledning. Det betyder att du får en engagerad partner genom hela processen: från strategi och manus till inspelning, redigering och färdig produktion. Vi håller det vi lovar – i tid, på budget och med kvalitet.">Vi är en produktionsbyrå som kombinerar kreativ höjd med trygg projektledning. Det betyder att du får en engagerad partner genom hela processen: från strategi och manus till inspelning, redigering och färdig produktion. Vi håller det vi lovar – i tid, på budget och med kvalitet.</p>
+            </div>
+            
+            <div class="services-section">
+                <h2 class="services-title" data-en="What We Do" data-sv="Vad vi gör">Vad vi gör</h2>
+                <div class="services-list">
+                    <div class="service-item">
+                        <h4 data-en="Advertising & Brand Films" data-sv="Reklamfilm och varumärkesfilm">Reklamfilm och varumärkesfilm</h4>
+                    </div>
+                    <div class="service-item">
+                        <h4 data-en="Information & Explainer Videos" data-sv="Informationsfilm och explainer">Informationsfilm och explainer</h4>
+                    </div>
+                    <div class="service-item">
+                        <h4 data-en="Music Videos & Artist Portraits" data-sv="Musikvideos och artistporträtt">Musikvideos och artistporträtt</h4>
+                    </div>
+                    <div class="service-item">
+                        <h4 data-en="Employer Branding & Recruitment" data-sv="Employer branding och rekryteringsfilm">Employer branding och rekryteringsfilm</h4>
+                    </div>
+                    <div class="service-item">
+                        <h4 data-en="Web & Social Media Content" data-sv="Content för webb och sociala medier">Content för webb och sociala medier</h4>
+                    </div>
+                    <div class="service-item">
+                        <h4 data-en="Event & Documentation Films" data-sv="Eventfilm och dokumentation">Eventfilm och dokumentation</h4>
+                    </div>
+                </div>
+                
+                <p class="about-text" style="text-align: center; margin-top: 40px;" data-en="We work with both large and small projects – for companies, agencies, artists and organizations that want to reach out with clarity, feeling and style." data-sv="Vi jobbar med både stora och små uppdrag – för företag, byråer, artister och organisationer som vill nå ut med tydlighet, känsla och stil.">Vi jobbar med både stora och små uppdrag – för företag, byråer, artister och organisationer som vill nå ut med tydlighet, känsla och stil.</p>
+            </div>
+            
+            <div class="philosophy-section">
+                <h2 class="philosophy-title" data-en="Our Philosophy" data-sv="Vår filosofi">Vår filosofi</h2>
+                <p class="philosophy-text" data-en="We don't believe in fluff. We believe in clear communication, strong ideas and good collaboration. Film shouldn't just look good – it should be useful." data-sv="Vi tror inte på fluff. Vi tror på tydlig kommunikation, starka idéer och gott samarbete. Film ska inte bara se bra ut – den ska göra nytta.">Vi tror inte på fluff. Vi tror på tydlig kommunikation, starka idéer och gott samarbete. Film ska inte bara se bra ut – den ska göra nytta.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+let currentLanguage = 'sv';
+let menuOpen = false;
+
+function toggleMenu() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    menuOpen = !menuOpen;
+    menuToggle.classList.toggle('active');
+    navMenu.classList.toggle('active');
+    
+    // Prevent body scroll when menu is open
+    document.body.style.overflow = menuOpen ? 'hidden' : 'auto';
+}
+
+function showHome() {
+    document.getElementById('home-page').style.display = 'block';
+    document.getElementById('about-page').classList.remove('active');
+    toggleMenu(); // Close menu
+}
+
+function showAbout() {
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('about-page').classList.add('active');
+    toggleMenu(); // Close menu
+}
+
+function toggleLanguage() {
+    const newLanguage = currentLanguage === 'sv' ? 'en' : 'sv';
+    currentLanguage = newLanguage;
+    
+    const button = document.querySelector('.language-toggle');
+    button.textContent = newLanguage === 'sv' ? 'EN' : 'SV';
+    
+    // Update all elements with language data
+    const elements = document.querySelectorAll('[data-en][data-sv]');
+    elements.forEach(element => {
+        const text = element.getAttribute(`data-${newLanguage}`);
+        if (text) {
+            element.textContent = text;
+        }
+    });
+    
+    // Update placeholders
+    const placeholders = document.querySelectorAll('[data-en-placeholder][data-sv-placeholder]');
+    placeholders.forEach(element => {
+        const placeholder = element.getAttribute(`data-${newLanguage}-placeholder`);
+        if (placeholder) {
+            element.placeholder = placeholder;
+        }
+    });
+    
+    // Update document language
+    document.documentElement.lang = newLanguage;
+}
+
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    const navMenu = document.querySelector('.nav-menu');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (menuOpen && !navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        toggleMenu();
+    }
+});
+
+// Handle newsletter form submission
+document.addEventListener('DOMContentLoaded', () => {
+    const newsletterForm = document.querySelector('.newsletter-form');
+    
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emailInput = newsletterForm.querySelector('.newsletter-input');
+            const email = emailInput.value.trim();
+            
+            if (email && isValidEmail(email)) {
+                // Simulate form submission
+                const button = newsletterForm.querySelector('.newsletter-button');
+                const originalText = button.textContent;
+                
+                button.textContent = currentLanguage === 'sv' ? 'Tack!' : 'Thanks!';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'linear-gradient(135deg, #ff6b35, #f7931e)';
+                    emailInput.value = '';
+                }, 2000);
+            } else {
+                // Show error
+                emailInput.style.borderColor = '#dc3545';
+                setTimeout(() => {
+                    emailInput.style.borderColor = '#333';
+                }, 2000);
+            }
+        });
+    }
+});
+
+// Email validation helper
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    threshold: 0.2,
+    rootMargin: '0px 0px -100px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            entry.target.classList.add('animate-in');
+        }
+    });
+}, observerOptions);
+
+// Grid animation setup
+document.addEventListener('DOMContentLoaded', () => {
+    // Style grid items for bottom-to-top animation
+    const gridItems = document.querySelectorAll('.grid-item');
+    gridItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(80px)';
+        item.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
+        observer.observe(item);
+    });
+    
+    // Style other elements for fade-in animation
+    const otherElements = document.querySelectorAll('.service-item, .about-text');
+    otherElements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(el);
+    });
+    
+    // Add CSS for grid animation class
+    const style = document.createElement('style');
+    style.textContent = `
+        .grid-item.animate-in {
+            animation: slideUpFade 0.8s ease forwards;
+        }
+        
+        @keyframes slideUpFade {
+            0% {
+                opacity: 0;
+                transform: translateY(80px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .grid-item:hover {
+            transform: scale(1.02) !important;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Video error handling
+document.addEventListener('DOMContentLoaded', () => {
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+        video.addEventListener('error', function() {
+            console.warn('Video failed to load:', this.src);
+            // You could add fallback behavior here
+        });
+    });
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOpen) {
+        toggleMenu();
+    }
+});
+
+// Handle resize events
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && menuOpen) {
+        toggleMenu();
+    }
+});
+    </script>
+</body>
+</html>

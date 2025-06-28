@@ -14,179 +14,181 @@
 <body>
     <!-- Header -->
     <header>
-        <div class="container">
-          <div class="header-inner">
-            <a href="/" class="logo">
-              <img src="https://res.cloudinary.com/dawxl838a/image/upload/v1746869871/WhatsApp_Image_2025-03-30_at_19.48.32_d7dd8868_pudffo.jpg" alt="Engdahls & Co" class="logo-img">
-            </a>
-            <button class="nav-toggle">☰</button>
-            <nav class="main-nav">
-              <button class="close-nav">✕</button>
-              <ul>
-                <li><a href="/">alice engdahl</a></li>
-                <li><a href="#" class="about-link">(about)</a></li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-    <!-- Video Intro Section -->
-    <section class="intro-section">
-        <div class="intro-container">
-            <div class="intro-video-wrapper">
-                <video class="intro-background-video" autoplay loop muted playsinline>
-                    <source src="<%= introVideo %>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                <div class="intro-overlay">
-                    <h1 class="intro-heading"><%= introHeading %></h1>
-                    <p class="intro-description"><%= introDescription %></p>
-                    <a href="#" class="about-link contact-button">Contact Us</a>
+        <nav>
+            <a href="/" class="logo">BEP</a>
+            <div class="nav-right">
+                <button class="language-toggle" onclick="toggleLanguage()">EN</button>
+                <div class="menu-toggle" onclick="toggleMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
+        </nav>
+        
+        <div class="nav-menu">
+            <div class="nav-menu-content">
+                <div class="nav-links">
+                    <ul>
+                        <li><a href="#" onclick="showAbout()" data-en="About" data-sv="Om oss">Om oss</a></li>
+                    </ul>
+                    <div class="nav-contact">
+                    <h3 data-en="Contact" data-sv="Kontakt">Kontakt</h3>
+                    <div class="contact-info">
+                        <p class="contact-email">info@backendproduction.se</p>
+                        <p class="contact-phone">+46 123 456 789</p>
+                        <p class="contact-location" data-en="Stockholm, Sweden" data-sv="Stockholm, Sverige">Stockholm, Sverige</p>
+                    </div>
+                </div>
+                </div>
+                
+                <div class="nav-what-we-do">
+                    <h3 data-en="What we do" data-sv="Vad vi gör">Vad vi gör</h3>
+                    <ul>
+                        <li data-en="Commercials and brand films" data-sv="Reklamfilm och varumärkesfilm">Reklamfilm och varumärkesfilm</li>
+                        <li data-en="Explainer videos and corporate communication" data-sv="Informationsfilm och företagskommunikation">Informationsfilm och företagskommunikation</li>
+                        <li data-en="Music videos and artist profiles" data-sv="Musikvideos och artistporträtt">Musikvideos och artistporträtt</li>
+                        <li data-en="Employer branding and recruitment films" data-sv="Employer branding och rekryteringsfilm">Employer branding och rekryteringsfilm</li>
+                        <li data-en="Content for web and social media" data-sv="Content för webb och sociala medier">Content för webb och sociala medier</li>
+                        <li data-en="Event films and documentation" data-sv="Eventfilm och dokumentation">Eventfilm och dokumentation</li>
+                    </ul>
+                </div>
+                
+                <div class="nav-services">
+                    <h3 data-en="Services" data-sv="Tjänster">Tjänster</h3>
+                    <ul>
+                        <li data-en="Movie production" data-sv="Filmproduktion">Filmproduktion</li>
+                        <li data-en="Service production" data-sv="Serviceproduktion">Serviceproduktion</li>
+                        <li data-en="Photography" data-sv="Fotografi">Fotografi</li>
+                    </ul>
+                </div>
+                
+                
+            </div>
         </div>
-    </section>
+    </header>
 
-    <!-- Video Grid Section -->
-    <section class="video-grid-section" id="video-grid-section">
-        <div class="container">
-            <div class="video-grid">
-                <% allMedia.forEach(item => { %>
-                    <!-- Make sure the data-category attribute is the category_id, not the category name -->
-                    <div class="grid-item" data-category="<%= item.category_id %>">
-                        <% if(item.type === 'image') { %>
-                            <!-- For images, link to the gallery page -->
-                            <a href="/gallery/<%= item.id %>" class="grid-item-inner image-link">
-                                <img src="<%= item.file_path %>" alt="<%= item.title %>">
-                                <div class="grid-item-overlay">
-                                    <h3 class="grid-item-title"><%= item.title %></h3>
-                                    <p class="grid-item-category"><%= item.category_name %></p>
-                                </div>
-                            </a>
-                        <% } else if(item.type === 'video') { %>
-                            <!-- For videos, add data-video-src for modal trigger -->
-                            <div class="grid-item-inner" data-video-src="<%= item.file_path %>">
-                                <% if (item.file_path) { %>
-                                    <video <% if (item.poster_image) { %>poster="<%= item.poster_image %>"<% } %>>
-                                        <source src="<%= item.file_path %>" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                <% } else { %>
-                                    <div class="media-placeholder">
-                                        <span>Media unavailable</span>
-                                    </div>
-                                <% } %>
-                                <div class="grid-item-overlay">
-                                    <h3 class="grid-item-title"><%= item.title %></h3>
-                                    <p class="grid-item-category"><%= item.category_name %></p>
+    <div id="home-page">
+        <!-- Video Hero Section -->
+        <section class="video-hero">
+            <video autoplay muted loop>
+                <source src="<%= introVideo %>" type="video/mp4">
+                <!-- Fallback for browsers that don't support video -->
+                <div style="background: linear-gradient(135deg, #0a0a0a, #ff6b35); height: 100vh; display: flex; align-items: center; justify-content: center;">
+                    <h1 style="color: white; text-align: center;">Video Not Supported</h1>
+                </div>
+            </video>
+            <div class="video-overlay">
+                <div class="video-content">
+                    <h1 data-en="BackEndProduction" data-sv="BackEndProduction">BackEndProduction</h1>
+                    <h2 data-en="Strong ideas deserve to be powerfully told." data-sv="Starka idéer förtjänar att bli starkt berättade.">Starka idéer förtjänar att bli starkt berättade.</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <section class="content-grid">
+            <% allMedia.forEach((item, index) => { %>
+                <div class="grid-item" data-category="<%= item.category_id %>">
+                    <% if(item.type === 'image') { %>
+                        <a href="/gallery/<%= item.id %>" class="grid-item-link">
+                            <img src="<%= item.file_path %>" alt="<%= item.title %>">
+                            <div class="grid-overlay">
+                                <div class="grid-content">
+                                    <h3 data-en="<%= item.titleEn || item.title %>" data-sv="<%= item.title %>"><%= item.title %></h3>
+                                    <p data-en="<%= item.descriptionEn || item.description %>" data-sv="<%= item.description %>"><%= item.description %></p>
                                 </div>
                             </div>
-                        <% } %>
-                    </div>
-                <% }); %>
-            </div>
-        </div>
-    </section>
+                        </a>
+                    <% } else if(item.type === 'video') { %>
+                        <div class="grid-item-inner" data-video-src="<%= item.file_path %>">
+                            <video autoplay muted loop <% if (item.poster_image) { %>poster="<%= item.poster_image %>"<% } %>>
+                                <source src="<%= item.file_path %>" type="video/mp4">
+                            </video>
+                            <div class="grid-overlay">
+                                <div class="grid-content">
+                                    <h3 data-en="<%= item.titleEn || item.title %>" data-sv="<%= item.title %>"><%= item.title %></h3>
+                                    <p data-en="<%= item.descriptionEn || item.description %>" data-sv="<%= item.description %>"><%= item.description %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% }); %>
+        </section>
 
-    <!-- Category Filter Menu -->
-    <ul class="dropdown-menu">
-        <li><a href="#" data-category="all">All</a></li>
-        <% categories.forEach(category => { %>
-        <li><a href="#" data-category="<%= category.id %>"><%= category.name %></a></li>
-        <% }); %>
-    </ul>
-
-    <!-- Video Modal - with explicit controls enabled -->
-    <div class="video-modal">
-        <div class="modal-content">
-            <button class="close-modal">&times;</button>
-            <video class="modal-video" controls>
-                <source src="" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-    </div>
-
-   <!-- About Modal -->
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="aboutModalLabel">About</h5>
-            <button type="button" class="btn-close" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Alice Engdahl</p>
-                <p>Producer at Rio Pictures</p>
-                <p class="mail">Send me an email:</p>
-                <p> <a href="mailto:alice@rio.pictures">alice@rio.pictures</a></p>
-
-                <div class="modal-footer">
-                    <a href="https://www.instagram.com/alicengdahl/?hl=en" target="_blank" rel="noopener noreferrer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-instagram">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                    </a>
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="newsletter">
+                    <h3 data-en="Stay Updated" data-sv="Håll dig uppdaterad">Håll dig uppdaterad</h3>
+                    <p data-en="Subscribe to our newsletter for the latest projects and insights." data-sv="Prenumerera på vårt nyhetsbrev för de senaste projekten och insikterna.">Prenumerera på vårt nyhetsbrev för de senaste projekten och insikterna.</p>
+                    <form class="newsletter-form">
+                        <input type="email" class="newsletter-input" placeholder="Din e-postadress" data-en-placeholder="Your email address" data-sv-placeholder="Din e-postadress">
+                        <button type="submit" class="newsletter-button" data-en="Subscribe" data-sv="Prenumerera">Prenumerera</button>
+                    </form>
+                </div>
+                
+                <div class="footer-info">
+                    <h3 data-en="Contact" data-sv="Kontakt">Kontakt</h3>
+                    <% contactInfo.forEach(info => { %>
+                        <p class="<%= info.class %>"><%- info.text %></p>
+                    <% }); %>
                 </div>
             </div>
             
-        </div>
-        </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= currentYear %> <%= companyName %>. <span data-en="All rights reserved." data-sv="Alla rättigheter förbehållna.">Alla rättigheter förbehållna.</span></p>
+            </div>
+        </footer>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <!-- Column 1: Quick Links -->
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <ul class="footer-links">
-                    <% quickLinks.forEach(link => { %>
-                        <li><a href="<%= link.url %>" <% if(link.class) { %>class="<%= link.class %>"<% } %>><%= link.name %></a></li>
-                    <% }); %>
-                </ul>
-            </div>
-    
-            <!-- Column 2: Services -->
-            <div class="footer-column">
-                <h3>Our Services</h3>
-                <ul class="footer-links">
-                    <% services.forEach(service => { %>
-                        <li><a href="<%= service.url %>"><%= service.name %></a></li>
-                    <% }); %>
-                </ul>
-            </div>
-     
-           <!-- Column 3: Contact Info (with social icons) -->
-            <div class="footer-column">
-                <h3>Contact Us</h3>
-                <% contactInfo.forEach(info => { %>
-                    <div class="contact-info">
-                        <span class="contact-info-icon"><%= info.icon %></span>
-                        <span class="contact-info-text"><%- info.text %></span>
-                    </div>
-                <% }); %>
-                <!-- Social links moved to contact section -->
-                <div class="social-links">
-                    <% socialLinks.forEach(function(link) { %>
-                    <a href="<%= link.url %>" class="social-link" title="<%= link.name %>" target="_blank" rel="noopener">
-                        <i class="<%= link.icon %>"></i>
-                    </a>
-                    <% }); %>
+  <!-- About Page -->
+  <div id="about-page" class="about-page">
+    <div class="about-container">
+        <div class="about-content">
+            <h1 class="about-title" data-en="About Us" data-sv="Om oss">Om oss</h1>
+            <h2 class="about-subtitle" data-en="Strong ideas deserve to be powerfully told." data-sv="Starka idéer förtjänar att bli starkt berättade.">Starka idéer förtjänar att bli starkt berättade.</h2>
+            
+            <p class="about-text" data-en="At BackEndProduction, we transform communication ideas into living film – with feeling, sharpness and a clear purpose. From concept to finished delivery." data-sv="På BackEndProduction förvandlar vi kommunikationsidéer till levande film – med känsla, skärpa och ett tydligt syfte. Från koncept till färdig leverans.">På BackEndProduction förvandlar vi kommunikationsidéer till levande film – med känsla, skärpa och ett tydligt syfte. Från koncept till färdig leverans.</p>
+            
+            <p class="about-text" data-en="We believe in the power of stories that touch, explain and make people act. Whether it's about building a brand, driving sales or expressing an artistic vision, we help you reach out – through moving images that actually communicate." data-sv="Vi tror på kraften i berättelser som berör, förklarar och får människor att agera. Oavsett om det handlar om att bygga varumärke, driva försäljning eller ge uttryck åt en artistisk vision, hjälper vi dig att nå fram – genom rörlig bild som faktiskt kommunicerar.">Vi tror på kraften i berättelser som berör, förklarar och får människor att agera. Oavsett om det handlar om att bygga varumärke, driva försäljning eller ge uttryck åt en artistisk vision, hjälper vi dig att nå fram – genom rörlig bild som faktiskt kommunicerar.</p>
+            
+            <p class="about-text" data-en="We are a production agency that combines creative heights with secure project management. This means you get a committed partner throughout the process: from strategy and script to filming, editing and finished production. We deliver what we promise – on time, on budget and with quality." data-sv="Vi är en produktionsbyrå som kombinerar kreativ höjd med trygg projektledning. Det betyder att du får en engagerad partner genom hela processen: från strategi och manus till inspelning, redigering och färdig produktion. Vi håller det vi lovar – i tid, på budget och med kvalitet.">Vi är en produktionsbyrå som kombinerar kreativ höjd med trygg projektledning. Det betyder att du får en engagerad partner genom hela processen: från strategi och manus till inspelning, redigering och färdig produktion. Vi håller det vi lovar – i tid, på budget och med kvalitet.</p>
+        </div>
+        
+        <div class="services-section">
+            <h2 class="services-title" data-en="What We Do" data-sv="Vad vi gör">Vad vi gör</h2>
+            <div class="services-list">
+                <div class="service-item">
+                    <h4 data-en="Advertising & Brand Films" data-sv="Reklamfilm och varumärkesfilm">Reklamfilm och varumärkesfilm</h4>
+                </div>
+                <div class="service-item">
+                    <h4 data-en="Information & Explainer Videos" data-sv="Informationsfilm och explainer">Informationsfilm och explainer</h4>
+                </div>
+                <div class="service-item">
+                    <h4 data-en="Music Videos & Artist Portraits" data-sv="Musikvideos och artistporträtt">Musikvideos och artistporträtt</h4>
+                </div>
+                <div class="service-item">
+                    <h4 data-en="Employer Branding & Recruitment" data-sv="Employer branding och rekryteringsfilm">Employer branding och rekryteringsfilm</h4>
+                </div>
+                <div class="service-item">
+                    <h4 data-en="Web & Social Media Content" data-sv="Content för webb och sociala medier">Content för webb och sociala medier</h4>
+                </div>
+                <div class="service-item">
+                    <h4 data-en="Event & Documentation Films" data-sv="Eventfilm och dokumentation">Eventfilm och dokumentation</h4>
                 </div>
             </div>
+            
+            <p class="about-text" style="text-align: center; margin-top: 40px;" data-en="We work with both large and small projects – for companies, agencies, artists and organizations that want to reach out with clarity, feeling and style." data-sv="Vi jobbar med både stora och små uppdrag – för företag, byråer, artister och organisationer som vill nå ut med tydlighet, känsla och stil.">Vi jobbar med både stora och små uppdrag – för företag, byråer, artister och organisationer som vill nå ut med tydlighet, känsla och stil.</p>
         </div>
-    
-        <div class="container">
-            <div class="footer-bottom">
-                <p class="copyright">© <%= currentYear %> <%= companyName %>. All Rights Reserved.</p>
-            </div>
+        
+        <div class="philosophy-section">
+            <h2 class="philosophy-title" data-en="Our Philosophy" data-sv="Vår filosofi">Vår filosofi</h2>
+            <p class="philosophy-text" data-en="We don't believe in fluff. We believe in clear communication, strong ideas and good collaboration. Film shouldn't just look good – it should be useful." data-sv="Vi tror inte på fluff. Vi tror på tydlig kommunikation, starka idéer och gott samarbete. Film ska inte bara se bra ut – den ska göra nytta.">Vi tror inte på fluff. Vi tror på tydlig kommunikation, starka idéer och gott samarbete. Film ska inte bara se bra ut – den ska göra nytta.</p>
         </div>
-    </footer>
-
+    </div>
+</div>
     <!-- JavaScript -->
     <script src="/js/homepage.js"></script>
 </body>
